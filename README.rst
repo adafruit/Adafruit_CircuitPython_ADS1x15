@@ -33,14 +33,28 @@ Single Ended
 
   import board
   import busio
+  from adafruit_ads1x15.single_ended import ADS1015
+
   i2c = busio.I2C(board.SCL, board.SDA)
-  from adafruit_ada1x15.single_ended import ADS1115
-  # basic usage
-  adc = ADS1115(i2c)
-  adc.read_adc(0)
-  # using value property of a specific channel
-  chan0 = adc[0]
-  chan0.value
+  adc = ADS1015(i2c)
+  while True:
+      # channel 0
+      print(adc[0].value, adc[0].volts)
+
+Differential
+------------
+
+.. code-block:: python
+
+  import board
+  import busio
+  from adafruit_ads1x15.differential import ADS1015
+
+  i2c = busio.I2C(board.SCL, board.SDA)
+  adc = ADS1015(i2c)
+  while True:
+      # channel 0 - channel 1
+      print(adc[(0,1)].value, adc[(0,1)].volts)
 
 
 Contributing

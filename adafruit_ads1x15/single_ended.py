@@ -1,6 +1,8 @@
 from .adafruit_ads1x15 import *
 
 class ADS1x15_SingleEnded(ADS1x15):
+    """Base functionality for ADS1x15 analog to digital converters operating
+    in single ended mode."""
 
     def __getitem__(self, key):
         return self._channels[key]
@@ -35,11 +37,38 @@ class ADS1x15_SingleEnded(ADS1x15):
         return self._read(channel + 0x04, gain, data_rate, ADS1x15_CONFIG_MODE_CONTINUOUS)
 
 class ADS1015(ADS1x15_SingleEnded):
-    def __init__():
-        pass
+    """ADS1015 12-bit single ended analog to digital converter instance."""
+
+    def __init__(self, *args, **kwargs):
+        super(ADS1015, self).__init__(*args, **kwargs)
+        self.bits = 12
+
+    def _data_rate_default(self):
+        # Default from datasheet page 19, config register DR bit default.
+        return 1600
+
+    def _data_rate_config(self, data_rate):
+        if data_rate not in ADS1015_CONFIG_DR:
+            raise ValueError('Data rate must be one of: 128, 250, 490, 920, 1600, 2400, 3300')
+        return ADS1015_CONFIG_DR[data_rate]
+
+    def _conversion_value(self, low, high):
+        # Convert to 12-bit signed value.
+        value = ((high & 0xFF) << 4) | ((low & 0xFF) >> 4)
+        # Check for sign bit and turn into a negative value if set.
+        if value & 0x800 != 0:
+            value -= 1 << 12
+        return value
+
+    def _read_channel(self, channel):
+        return self.read_adc(channel)
+
+    def _read_channel_volts(self, channel):
+        return self.read_volts(channel)
+
 
 class ADS1115(ADS1x15_SingleEnded):
-    """ADS1115 16-bit analog to digital converter instance."""
+    """ADS1115 16-bit single ended analog to digital converter instance."""
 
     def __init__(self, *args, **kwargs):
         super(ADS1115, self).__init__(*args, **kwargs)

@@ -1,15 +1,22 @@
 # Travis CI configuration for automated .mpy file generation.
+# Version: 2.0 (support for both .mpy and packages)
 # Author: Tony DiCola
 # License: Public Domain
 # This configuration will work with Travis CI (travis-ci.org) to automacially
-# build .mpy files for CircuitPython when a new tagged release is created.  This
-# file is relatively generic and can be shared across multiple repositories by
-# following these steps:
+# build .mpy files and packages for MicroPython when a new tagged release is
+# created.  This file is relatively generic and can be shared across multiple
+# repositories by following these steps:
 #   1. Copy this file into a .travis.yml file in the root of the repository.
-#   2. Change the deploy > file section below to list each of the .mpy files
-#      that should be generated.  The config will automatically look for
-#      .py files with the same name as the source for generating the .mpy files.
-#      Note that the .mpy extension should be lower case!
+#   2. Change the deploy > file section below to list each of the .mpy files or
+#      package .zip files that should be generated.
+#      For each .mpy file listed the config will automatically look for .py files
+#      with the same name as the source for generating the .mpy files.  Note that
+#      the .mpy extension should be lower case!
+#      For each .zip file listed the config will assume a folder with the same
+#      name exists (minus the .zip extension) and will recursively walk the folder
+#      to generate .mpy versions of all .py files EXCEPT __init__.py (not supported
+#      right now because of a bug).  Then a zip of the directory will be generated
+#      with just the .mpy and __init__.py files.
 #   3. Commit the .travis.yml file and push it to GitHub.
 #   4. Go to travis-ci.org and find the repository (it needs to be setup to access
 #      your github account, and your github account needs access to write to the
@@ -36,18 +43,17 @@ deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   file:
-  - "adafruit_ads21x15.mpy"
+  - adafruit_ads1x15.zip
   skip_cleanup: true
   on:
     tags: true
 
 before_install:
-- sudo apt-get -yqq update
-- sudo apt-get install -y build-essential git python python-pip
-- git clone https://github.com/adafruit/circuitpython.git
-- make -C circuitpython/mpy-cross
-- export PATH=$PATH:$PWD/circuitpython/mpy-cross/
-- sudo pip install shyaml
+  - wget https://raw.githubusercontent.com/adafruit/MicroPython_TravisCI_Deploy/master/install_dependencies.sh
+  - chmod +x install_dependencies.sh
+  - source install_dependencies.sh
 
 before_deploy:
-- shyaml get-values deploy.file < .travis.yml | sed 's/.mpy/.py/' | xargs -L1 mpy-cross
+  - wget https://raw.githubusercontent.com/adafruit/MicroPython_TravisCI_Deploy/master/build_release.sh
+  - chmod +x build_release.sh
+  - ./build_release.sh

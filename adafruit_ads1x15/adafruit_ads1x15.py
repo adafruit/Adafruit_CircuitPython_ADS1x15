@@ -192,7 +192,7 @@ class ADS1x15(object):
             # Retrieve the result.
             self.buf[0] = ADS1x15_POINTER_CONVERSION
             i2c.write(self.buf, end=1, stop=False)
-            i2c.read_into(self.buf, start=1)
+            i2c.readinto(self.buf, start=1)
         return self._conversion_value(self.buf[2], self.buf[1])
 
     def stop_adc(self):
@@ -215,5 +215,5 @@ class ADS1x15(object):
         self.buf[0] = ADS1x15_POINTER_CONVERSION
         with self.i2c_device as i2c:
             i2c.write(self.buf, end=1, stop=False)
-            i2c.read_into(self.buf, start=1)
+            i2c.readinto(self.buf, start=1)
         return self._conversion_value(self.buf[2], self.buf[1])

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """
-`adafruit__ads1x15`
+`adafruit_ads1x15`
 ====================================================
 
 CircuitPython driver for ADS1015/1115 ADCs.
@@ -32,15 +32,16 @@ from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
 # Register and other configuration values:
-ADS1x15_DEFAULT_ADDRESS        = const(0x48)
-ADS1x15_POINTER_CONVERSION     = const(0x00)
-ADS1x15_POINTER_CONFIG         = const(0x01)
-ADS1x15_POINTER_LOW_THRESHOLD  = const(0x02)
-ADS1x15_POINTER_HIGH_THRESHOLD = const(0x03)
-ADS1x15_CONFIG_OS_SINGLE       = const(0x8000)
-ADS1x15_CONFIG_MUX_OFFSET      = const(12)
+# pylint: disable=bad-whitespace
+ADS1X15_DEFAULT_ADDRESS        = const(0x48)
+ADS1X15_POINTER_CONVERSION     = const(0x00)
+ADS1X15_POINTER_CONFIG         = const(0x01)
+ADS1X15_POINTER_LOW_THRESHOLD  = const(0x02)
+ADS1X15_POINTER_HIGH_THRESHOLD = const(0x03)
+ADS1X15_CONFIG_OS_SINGLE       = const(0x8000)
+ADS1X15_CONFIG_MUX_OFFSET      = const(12)
 # Maping of gain values to config register values.
-ADS1x15_CONFIG_GAIN = {
+ADS1X15_CONFIG_GAIN = {
     2/3: 0x0000,
     1:   0x0200,
     2:   0x0400,
@@ -48,7 +49,7 @@ ADS1x15_CONFIG_GAIN = {
     8:   0x0800,
     16:  0x0A00
 }
-ADS1x15_PGA_RANGE = {
+ADS1X15_PGA_RANGE = {
     2/3: 6.144,
     1:   4.096,
     2:   2.048,
@@ -56,8 +57,8 @@ ADS1x15_PGA_RANGE = {
     8:   0.512,
     16:  0.256
 }
-ADS1x15_CONFIG_MODE_CONTINUOUS  = const(0x0000)
-ADS1x15_CONFIG_MODE_SINGLE      = const(0x0100)
+ADS1X15_CONFIG_MODE_CONTINUOUS  = const(0x0000)
+ADS1X15_CONFIG_MODE_SINGLE      = const(0x0100)
 # Mapping of data/sample rate to config register values for ADS1015 (faster).
 ADS1015_CONFIG_DR = {
     128:   0x0000,
@@ -79,21 +80,22 @@ ADS1115_CONFIG_DR = {
     475:  0x00C0,
     860:  0x00E0
 }
-ADS1x15_CONFIG_COMP_WINDOW      = const(0x0010)
-ADS1x15_CONFIG_COMP_ACTIVE_HIGH = const(0x0008)
-ADS1x15_CONFIG_COMP_LATCHING    = const(0x0004)
-ADS1x15_CONFIG_COMP_QUE = {
+ADS1X15_CONFIG_COMP_WINDOW      = const(0x0010)
+ADS1X15_CONFIG_COMP_ACTIVE_HIGH = const(0x0008)
+ADS1X15_CONFIG_COMP_LATCHING    = const(0x0004)
+ADS1X15_CONFIG_COMP_QUE = {
     1: 0x0000,
     2: 0x0001,
     4: 0x0002
 }
-ADS1x15_CONFIG_COMP_QUE_DISABLE = const(0x0003)
-ADS1x15_DIFF_CHANNELS = {
+ADS1X15_CONFIG_COMP_QUE_DISABLE = const(0x0003)
+ADS1X15_DIFF_CHANNELS = {
     (0,1): 0,
     (0,3): 1,
     (1,3): 2,
     (2,3): 3
 }
+# pylint: enable=bad-whitespace
 
 class ADC_Channel(object):
     """Provides per channel access to ADC readings."""
@@ -105,18 +107,18 @@ class ADC_Channel(object):
     @property
     def value(self, ):
         """ADC reading in raw counts."""
-        return self._adc._read_channel(self._channel)
+        return self._adc._read_channel(self._channel) # pylint: disable=protected-access
 
     @property
     def volts(self, ):
         """ADC reading in volts."""
-        return self._adc._read_channel_volts(self._channel)
+        return self._adc._read_channel_volts(self._channel) # pylint: disable=protected-access
 
 
 class ADS1x15(object):
     """Base functionality for ADS1x15 analog to digital converters."""
 
-    def __init__(self, i2c, address=ADS1x15_DEFAULT_ADDRESS, **kwargs):
+    def __init__(self, i2c, address=ADS1X15_DEFAULT_ADDRESS):
         self.buf = bytearray(3)
         self.i2c_device = I2CDevice(i2c, address)
         self.bits = None
@@ -162,13 +164,13 @@ class ADS1x15(object):
         """Perform an ADC read with the provided mux, gain, data_rate, and mode
         values.  Returns the signed integer result of the read.
         """
-        config = ADS1x15_CONFIG_OS_SINGLE  # Go out of power-down mode for conversion.
+        config = ADS1X15_CONFIG_OS_SINGLE  # Go out of power-down mode for conversion.
         # Specify mux value.
-        config |= (mux & 0x07) << ADS1x15_CONFIG_MUX_OFFSET
+        config |= (mux & 0x07) << ADS1X15_CONFIG_MUX_OFFSET
         # Validate the passed in gain and then set it in the config.
-        if gain not in ADS1x15_CONFIG_GAIN:
+        if gain not in ADS1X15_CONFIG_GAIN:
             raise ValueError('Gain must be one of: 2/3, 1, 2, 4, 8, 16')
-        config |= ADS1x15_CONFIG_GAIN[gain]
+        config |= ADS1X15_CONFIG_GAIN[gain]
         # Set the mode (continuous or single shot).
         config |= mode
         # Get the default data rate if none is specified (default differs between
@@ -178,10 +180,10 @@ class ADS1x15(object):
         # Set the data rate (this is controlled by the subclass as it differs
         # between ADS1015 and ADS1115).
         config |= self._data_rate_config(data_rate)
-        config |= ADS1x15_CONFIG_COMP_QUE_DISABLE  # Disble comparator mode.
+        config |= ADS1X15_CONFIG_COMP_QUE_DISABLE  # Disble comparator mode.
         # Send the config value to start the ADC conversion.
         # Explicitly break the 16-bit value down to a big endian pair of bytes.
-        self.buf[0] = ADS1x15_POINTER_CONFIG
+        self.buf[0] = ADS1X15_POINTER_CONFIG
         self.buf[1] = (config >> 8) & 0xFF
         self.buf[2] = config & 0xFF
         with self.i2c_device as i2c:
@@ -190,7 +192,7 @@ class ADS1x15(object):
             # small offset to be sure (0.1 millisecond).
             time.sleep(1.0/data_rate+0.0001)
             # Retrieve the result.
-            self.buf[0] = ADS1x15_POINTER_CONVERSION
+            self.buf[0] = ADS1X15_POINTER_CONVERSION
             i2c.write(self.buf, end=1, stop=False)
             i2c.readinto(self.buf, start=1)
         return self._conversion_value(self.buf[2], self.buf[1])
@@ -200,7 +202,7 @@ class ADS1x15(object):
         """
         # Set the config register to its default value of 0x8583 to stop
         # continuous conversions.
-        self.buf[0] = ADS1x15_POINTER_CONFIG
+        self.buf[0] = ADS1X15_POINTER_CONFIG
         self.buf[1] = 0x85
         self.buf[2] = 0x83
         with self.i2c_device as i2c:
@@ -212,7 +214,7 @@ class ADS1x15(object):
         """
         # Retrieve the conversion register value, convert to a signed int, and
         # return it.
-        self.buf[0] = ADS1x15_POINTER_CONVERSION
+        self.buf[0] = ADS1X15_POINTER_CONVERSION
         with self.i2c_device as i2c:
             i2c.write(self.buf, end=1, stop=False)
             i2c.readinto(self.buf, start=1)

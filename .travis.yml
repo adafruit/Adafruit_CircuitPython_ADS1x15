@@ -25,6 +25,6 @@ install:
   - pip install pylint circuitpython-travis-build-tools
 
 script:
-  - pylint adafruit_ads1x15.py
+  - pylint adafruit_ads1x15/*.py
   - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name examples/*.py)
   - circuitpython-build-bundles --filename_prefix adafruit-circuitpython-ads1x15 --library_location .

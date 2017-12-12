@@ -1,5 +1,41 @@
-from .adafruit_ads1x15 import *
+# The MIT License (MIT)
+#
+# Copyright (c) 2017 Carter Nelson for Adafruit Industries
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""
+`adafruit_ads1x15.single_ended`
+====================================================
 
+Single-ended driver for ADS1015/1115 ADCs.
+
+* Author(s): Carter Nelson
+"""
+
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
+
+from .adafruit_ads1x15 import ADS1x15
+from .adafruit_ads1x15 import ADS1X15_CONFIG_MODE_SINGLE, ADS1X15_CONFIG_MODE_CONTINUOUS
+from .adafruit_ads1x15 import ADS1X15_PGA_RANGE, ADS1015_CONFIG_DR, ADS1115_CONFIG_DR
+
+# pylint: disable=abstract-method
 class ADS1x15_SingleEnded(ADS1x15):
     """Base functionality for ADS1x15 analog to digital converters operating
     in single ended mode."""
@@ -14,7 +50,7 @@ class ADS1x15_SingleEnded(ADS1x15):
         assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
         # Perform a single shot read and set the mux value to the channel plus
         # the highest bit (bit 3) set.
-        return self._read(channel + 0x04, gain, data_rate, ADS1x15_CONFIG_MODE_SINGLE)
+        return self._read(channel + 0x04, gain, data_rate, ADS1X15_CONFIG_MODE_SINGLE)
 
     def read_volts(self, channel, gain=1, data_rate=None):
         """Read a single ADC channel and return the voltage value as a floating point
@@ -22,7 +58,7 @@ class ADS1x15_SingleEnded(ADS1x15):
         """
         assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
         raw = self.read_adc(channel, gain, data_rate)
-        volts = raw * (ADS1x15_PGA_RANGE[gain] / (2**(self.bits-1) - 1))
+        volts = raw * (ADS1X15_PGA_RANGE[gain] / (2**(self.bits-1) - 1))
         return volts
 
     def start_adc(self, channel, gain=1, data_rate=None):
@@ -34,7 +70,8 @@ class ADS1x15_SingleEnded(ADS1x15):
         assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
         # Start continuous reads and set the mux value to the channel plus
         # the highest bit (bit 3) set.
-        return self._read(channel + 0x04, gain, data_rate, ADS1x15_CONFIG_MODE_CONTINUOUS)
+        return self._read(channel + 0x04, gain, data_rate, ADS1X15_CONFIG_MODE_CONTINUOUS)
+# pylint: enable=abstract-method
 
 class ADS1015(ADS1x15_SingleEnded):
     """ADS1015 12-bit single ended analog to digital converter instance."""

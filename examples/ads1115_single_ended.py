@@ -29,7 +29,7 @@ while True:
 
     # Print results
     print("{:>5}\t{:>5.3f}\t{:>5}\t{:>5.3f}\t{:>5}\t{:>5.3f}\t{:>5}\t{:>5.3f}"
-           .format(r0, v0, r1, v1, r2, v2, r3, v3))
+          .format(r0, v0, r1, v1, r2, v2, r3, v3))
 
     # Sleep for a bit
     time.sleep(0.5)

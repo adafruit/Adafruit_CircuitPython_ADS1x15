@@ -15,10 +15,10 @@ print("{:>5}\t{:>5}".format('raw', 'v'))
 
 while True:
     # Get raw reading for differential input between channel 0 and 1
-    raw = adc[(0,1)].value
+    raw = adc[(0, 1)].value
 
     # Get voltage reading for differential input between channel 0 and 1
-    volts = adc[(0,1)].volts
+    volts = adc[(0, 1)].volts
 
     # Print results
     print("{:>5}\t{:>5.3f}".format(raw, volts))

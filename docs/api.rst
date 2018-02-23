@@ -3,3 +3,9 @@
 
 .. automodule:: adafruit_ads1x15.adafruit_ads1x15
    :members:
+
+.. automodule:: adafruit_ads1x15.differential
+   :members:
+
+.. automodule:: adafruit_ads1x15.single_ended
+   :members:

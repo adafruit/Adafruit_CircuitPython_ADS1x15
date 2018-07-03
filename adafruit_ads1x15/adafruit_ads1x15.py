@@ -145,7 +145,8 @@ class ADS1x15(object):
             i2c.write(self.buf, end=1, stop=False)
             i2c.readinto(self.buf, start=1)
         #         LSB          MSB
-        return self.buf[2], self.buf[1]
+        #return self.buf[2], self.buf[1]
+        return self.buf[1] << 8 | self.buf[2]
 
     def _data_rate_default(self):
         """Retrieve the default data rate for this ADC (in samples per second).
@@ -185,7 +186,8 @@ class ADS1x15(object):
         # OS is bit 15
         # OS = 0: Device is currently performing a conversion
         # OS = 1: Device is not currently performing a conversion
-        return self._read_register(ADS1X15_POINTER_CONFIG)[1] & 0x80
+        #return self._read_register(ADS1X15_POINTER_CONFIG)[1] & 0x80
+        return self._read_register(ADS1X15_POINTER_CONFIG) & 0x8000
 
     def _read(self, mux, gain, data_rate, mode):
         """Perform an ADC read with the provided mux, gain, data_rate, and mode
@@ -229,4 +231,6 @@ class ADS1x15(object):
         """
         # Retrieve the conversion register value, convert to a signed int, and
         # return it.
-        return self._conversion_value(*self._read_register(ADS1X15_POINTER_CONVERSION))
+        #return self._conversion_value(*self._read_register(ADS1X15_POINTER_CONVERSION))
+        result = self._read_register(ADS1X15_POINTER_CONVERSION)
+        return self._conversion_value(result & 0xff, result >> 8)

@@ -229,5 +229,4 @@ class ADS1x15(object):
         """
         # Retrieve the conversion register value, convert to a signed int, and
         # return it.
-        lsb, msb = self._read_register(ADS1X15_POINTER_CONVERSION)
-        return self._conversion_value(lsb, msb)
+        return self._conversion_value(*self._read_register(ADS1X15_POINTER_CONVERSION))

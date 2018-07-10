@@ -131,6 +131,22 @@ class ADS1x15(object):
                           ADC_Channel(self, 2),
                           ADC_Channel(self, 3)]
 
+    def _write_register(self, reg, value):
+        """Write 16 bit value to register."""
+        self.buf[0] = reg
+        self.buf[1] = (value >> 8) & 0xFF
+        self.buf[2] = value & 0xFF
+        with self.i2c_device as i2c:
+            i2c.write(self.buf)
+
+    def _read_register(self, reg):
+        """Return 16 bit register value as tuple of (LSB, MSB)."""
+        self.buf[0] = reg
+        with self.i2c_device as i2c:
+            i2c.write(self.buf, end=1, stop=False)
+            i2c.readinto(self.buf, start=1)
+        return self.buf[1] << 8 | self.buf[2]
+
     def _data_rate_default(self):
         """Retrieve the default data rate for this ADC (in samples per second).
         Should be implemented by subclasses.
@@ -164,6 +180,13 @@ class ADS1x15(object):
         """
         raise NotImplementedError('Subclass must implement _read_channel_volts function!')
 
+    def _conversion_complete(self):
+        """Return status of ADC conversion."""
+        # OS is bit 15
+        # OS = 0: Device is currently performing a conversion
+        # OS = 1: Device is not currently performing a conversion
+        return self._read_register(ADS1X15_POINTER_CONFIG) & 0x8000
+
     def _read(self, mux, gain, data_rate, mode):
         """Perform an ADC read with the provided mux, gain, data_rate, and mode
         values.  Returns the signed integer result of the read.
@@ -186,31 +209,19 @@ class ADS1x15(object):
         config |= self._data_rate_config(data_rate)
         config |= ADS1X15_CONFIG_COMP_QUE_DISABLE  # Disble comparator mode.
         # Send the config value to start the ADC conversion.
-        # Explicitly break the 16-bit value down to a big endian pair of bytes.
-        self.buf[0] = ADS1X15_POINTER_CONFIG
-        self.buf[1] = (config >> 8) & 0xFF
-        self.buf[2] = config & 0xFF
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
-            # Wait for the ADC sample to finish based on the sample rate plus a
-            # small offset to be sure (0.1 millisecond).
-            time.sleep(1.0/data_rate+0.0001)
-            # Retrieve the result.
-            self.buf[0] = ADS1X15_POINTER_CONVERSION
-            i2c.write(self.buf, end=1, stop=False)
-            i2c.readinto(self.buf, start=1)
-        return self._conversion_value(self.buf[2], self.buf[1])
+        self._write_register(ADS1X15_POINTER_CONFIG, config)
+        # Wait for conversion to complete
+        while not self._conversion_complete():
+            time.sleep(0.01)
+        # Return the result
+        return self.get_last_result()
 
     def stop_adc(self):
         """Stop all continuous ADC conversions (either normal or difference mode).
         """
         # Set the config register to its default value of 0x8583 to stop
         # continuous conversions.
-        self.buf[0] = ADS1X15_POINTER_CONFIG
-        self.buf[1] = 0x85
-        self.buf[2] = 0x83
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
+        self._write_register(ADS1X15_POINTER_CONFIG, 0x8583)
 
     def get_last_result(self):
         """Read the last conversion result when in continuous conversion mode.
@@ -218,8 +229,5 @@ class ADS1x15(object):
         """
         # Retrieve the conversion register value, convert to a signed int, and
         # return it.
-        self.buf[0] = ADS1X15_POINTER_CONVERSION
-        with self.i2c_device as i2c:
-            i2c.write(self.buf, end=1, stop=False)
-            i2c.readinto(self.buf, start=1)
-        return self._conversion_value(self.buf[2], self.buf[1])
+        result = self._read_register(ADS1X15_POINTER_CONVERSION)
+        return self._conversion_value(result & 0xff, result >> 8)

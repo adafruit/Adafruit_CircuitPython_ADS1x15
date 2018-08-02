@@ -11,6 +11,7 @@ deploy:
   file_glob: true
   file: "$TRAVIS_BUILD_DIR/bundles/*"
   skip_cleanup: true
+  overwrite: true
   on:
     tags: true
 - provider: pypi

@@ -11,6 +11,7 @@ deploy:
   file_glob: true
   file: "$TRAVIS_BUILD_DIR/bundles/*"
   skip_cleanup: true
+  overwrite: true
   on:
     tags: true
 - provider: pypi
@@ -22,6 +23,7 @@ deploy:
 install:
 - pip install -r requirements.txt
 - pip install pylint circuitpython-build-tools Sphinx sphinx-rtd-theme
+- pip install --force-reinstall pylint==1.9.2
 script:
 - pylint adafruit_ads1x15/*.py
 - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name examples/*.py)

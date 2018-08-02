@@ -2,12 +2,12 @@
 Introduction
 ============
 
-.. image:: https://readthedocs.org/projects/adafruit-circuitpython-CircuitPython_ADS1x15/badge/?version=latest
-    :target: https://circuitpython.readthedocs.io/projects/CircuitPython_ADS1x15/en/latest/
+.. image:: https://readthedocs.org/projects/adafruit-circuitpython-ads1x15/badge/?version=latest
+    :target: https://circuitpython.readthedocs.io/projects/ads1x15/en/latest/
     :alt: Documentation Status
 
 .. image :: https://img.shields.io/discord/327254708534116352.svg
-    :target: https://discord.gg/nBQh6qu
+    :target: https://adafru.it/discord
     :alt: Discord
 
 .. image:: https://travis-ci.org/adafruit/Adafruit_CircuitPython_ADS1x15.svg?branch=master
@@ -115,4 +115,3 @@ Now, once you have the virtual environment activated:
 This will output the documentation to ``docs/_build/html``. Open the index.html in your browser to
 view them. It will also (due to -W) error out on any warning like Travis will. This is a good way to
 locally verify it will pass.
-

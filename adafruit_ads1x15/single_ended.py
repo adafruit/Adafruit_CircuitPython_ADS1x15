@@ -47,7 +47,8 @@ class ADS1x15_SingleEnded(ADS1x15):
         """Read a single ADC channel and return the ADC value as a signed integer
         result.  Channel must be a value within 0-3.
         """
-        assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
+        if not 0 <= channel <= 3:
+            raise ValueError('Channel must be a value within 0-3!')
         # Perform a single shot read and set the mux value to the channel plus
         # the highest bit (bit 3) set.
         return self._read(channel + 0x04, gain, data_rate, ADS1X15_CONFIG_MODE_SINGLE)
@@ -56,7 +57,8 @@ class ADS1x15_SingleEnded(ADS1x15):
         """Read a single ADC channel and return the voltage value as a floating point
         result.  Channel must be a value within 0-3.
         """
-        assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
+        if not 0 <= channel <= 3:
+            raise ValueError('Channel must be a value within 0-3!')
         raw = self.read_adc(channel, gain, data_rate)
         volts = raw * (ADS1X15_PGA_RANGE[gain] / (2**(self.bits-1) - 1))
         return volts
@@ -67,7 +69,8 @@ class ADS1x15_SingleEnded(ADS1x15):
         function to read the most recent conversion result. Call stop_adc() to
         stop conversions.
         """
-        assert 0 <= channel <= 3, 'Channel must be a value within 0-3!'
+        if not 0 <= channel <= 3:
+            raise ValueError('Channel must be a value within 0-3!')
         # Start continuous reads and set the mux value to the channel plus
         # the highest bit (bit 3) set.
         return self._read(channel + 0x04, gain, data_rate, ADS1X15_CONFIG_MODE_CONTINUOUS)

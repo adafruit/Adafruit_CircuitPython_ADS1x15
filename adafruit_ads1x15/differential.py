@@ -51,7 +51,8 @@ class ADS1x15_Differential(ADS1x15):
         - 2 = Channel 1 minus channel 3
         - 3 = Channel 2 minus channel 3
         """
-        assert 0 <= differential <= 3, 'Differential must be a value within 0-3!'
+        if not 0 <= differential <= 3:
+            raise ValueError('Differential must be a value within 0-3!')
         # Perform a single shot read using the provided differential value
         # as the mux value (which will enable differential mode).
         return self._read(differential, gain, data_rate, ADS1X15_CONFIG_MODE_SINGLE)
@@ -64,7 +65,8 @@ class ADS1x15_Differential(ADS1x15):
         - 2 = Channel 1 minus channel 3
         - 3 = Channel 2 minus channel 3
         """
-        assert 0 <= differential <= 3, 'Differential must be a value within 0-3!'
+        if not 0 <= differential <= 3:
+            raise ValueError('Differential must be a value within 0-3!')
         raw = self.read_adc_difference(differential, gain, data_rate)
         volts = raw * (ADS1X15_PGA_RANGE[gain] / (2**(self.bits-1) - 1))
         return volts
@@ -80,7 +82,8 @@ class ADS1x15_Differential(ADS1x15):
         function continuously to read the most recent conversion result.  Call
         stop_adc() to stop conversions.
         """
-        assert 0 <= differential <= 3, 'Differential must be a value within 0-3!'
+        if not 0 <= differential <= 3:
+            raise ValueError('Differential must be a value within 0-3!')
         # Perform a single shot read using the provided differential value
         # as the mux value (which will enable differential mode).
         return self._read(differential, gain, data_rate, ADS1X15_CONFIG_MODE_CONTINUOUS)

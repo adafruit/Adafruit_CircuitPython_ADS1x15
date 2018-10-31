@@ -32,9 +32,14 @@ your device.
 Installing from PyPI
 --------------------
 
-On the Raspberry Pi, you can install the driver locally
-`from PyPI <https://pypi.org/project/adafruit-circuitpython-ads1x15/>`_.  To
-install system-wide, use:
+On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
+PyPI <https://pypi.org/project/adafruit-circuitpython-ads1x15/>`_. To install for current user:
+
+.. code-block:: shell
+
+    pip3 install adafruit-circuitpython-ads1x15
+
+To install system-wide (this may be required in some cases):
 
 .. code-block:: shell
 

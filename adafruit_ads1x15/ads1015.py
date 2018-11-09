@@ -48,6 +48,7 @@ P2 = 2
 P3 = 3
 
 class ADS1015(ADS1x15):
+    """Class for the ADS1015 12 bit ADC."""
 
     @property
     def bits(self):

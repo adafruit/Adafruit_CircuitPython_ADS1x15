@@ -28,11 +28,12 @@ differential ADC readings.
 * Author(s): Carter Nelson, adapted from MCP3xxx original by Brent Rubell
 """
 
+# pylint: disable=bad-whitespace
 _ADS1X15_DIFF_CHANNELS = {
-    (0,1): 0,
-    (0,3): 1,
-    (1,3): 2,
-    (2,3): 3
+    (0, 1): 0,
+    (0, 3): 1,
+    (1, 3): 2,
+    (2, 3): 3
 }
 _ADS1X15_PGA_RANGE = {
     2/3: 6.144,
@@ -42,6 +43,7 @@ _ADS1X15_PGA_RANGE = {
     8:   0.512,
     16:  0.256
 }
+# pylint: enable=bad-whitespace
 
 class AnalogIn():
     """AnalogIn Mock Implementation for ADC Reads."""
@@ -60,7 +62,8 @@ class AnalogIn():
         if negative_pin is not None:
             pins = (self._pin_setting, self._negative_pin)
             if pins not in _ADS1X15_DIFF_CHANNELS:
-                raise ValueError("Differential channels must be one of: {}".format(list(_ADS1X15_DIFF_CHANNELS.keys())))
+                raise ValueError("Differential channels must be one of: {}"
+                                .format(list(_ADS1X15_DIFF_CHANNELS.keys())))
             self._pin_setting = _ADS1X15_DIFF_CHANNELS[pins]
             self.is_differential = True
 

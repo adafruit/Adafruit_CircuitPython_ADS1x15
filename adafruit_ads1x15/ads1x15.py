@@ -82,13 +82,18 @@ class ADS1x15(object):
         raise NotImplementedError('Subclass must implement rates property.')
 
     @property
+    def rate_config(self):
+        """Rate configuration masks."""
+        raise NotImplementedError('Subclass must implement rate_config property.')
+
+    @property
     def gain(self):
         """The ADC gain."""
         return self._gain
 
     @gain.setter
     def gain(self, gain):
-        possible_gains = self.gains 
+        possible_gains = self.gains
         if gain not in possible_gains:
             raise ValueError("Gain must be one of: {}".format(possible_gains))
         self._gain = gain
@@ -120,7 +125,7 @@ class ADS1x15(object):
         """
         pin = pin if is_differential else pin + 0x04
         return self._read(pin)
-        
+
     def _data_rate_default(self):
         """Retrieve the default data rate for this ADC (in samples per second).
         Should be implemented by subclasses.

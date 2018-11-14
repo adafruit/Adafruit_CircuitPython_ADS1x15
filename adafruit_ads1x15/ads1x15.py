@@ -57,11 +57,11 @@ _ADS1X15_CONFIG_GAIN = {
 class ADS1x15(object):
     """Base functionality for ADS1x15 analog to digital converters."""
 
-    def __init__(self, i2c, address=_ADS1X15_DEFAULT_ADDRESS):
+    def __init__(self, i2c, gain=1, data_rate=None, mode=_ADS1X15_CONFIG_MODE_SINGLE, address=_ADS1X15_DEFAULT_ADDRESS):
         self.buf = bytearray(3)
-        self._gain = 1
-        self._data_rate = self._data_rate_default()
-        self._mode = _ADS1X15_CONFIG_MODE_SINGLE
+        self.gain = gain
+        self.data_rate = self._data_rate_default() if data_rate is None else data_rate
+        self.mode = mode
         self.i2c_device = I2CDevice(i2c, address)
 
     @property
@@ -112,7 +112,7 @@ class ADS1x15(object):
 
     @mode.setter
     def mode(self, mode):
-        if mode != _ADS1X15_CONFIG_MODE_CONTINUOUS or mode != _ADS1X15_CONFIG_MODE_SINGLE:
+        if mode != _ADS1X15_CONFIG_MODE_CONTINUOUS and mode != _ADS1X15_CONFIG_MODE_SINGLE:
             raise ValueError("Unsupported mode.")
         self._mode = mode
 

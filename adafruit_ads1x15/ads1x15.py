@@ -57,7 +57,7 @@ _ADS1X15_CONFIG_GAIN = {
 class ADS1x15(object):
     """Base functionality for ADS1x15 analog to digital converters."""
 
-    def __init__(self, i2c, gain=1, data_rate=None, mode=_ADS1X15_CONFIG_MODE_SINGLE, 
+    def __init__(self, i2c, gain=1, data_rate=None, mode=_ADS1X15_CONFIG_MODE_SINGLE,
                  address=_ADS1X15_DEFAULT_ADDRESS):
         #pylint: disable=too-many-arguments
         self.buf = bytearray(3)

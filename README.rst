@@ -62,31 +62,29 @@ Single Ended
 
 .. code-block:: python
 
-  import board
-  import busio
-  from adafruit_ads1x15.single_ended import ADS1015
+    import time
+    import board
+    import busio
+    import adafruit_ads1x15.ads1015 as ADS
+    from adafruit_ads1x15.analog_in import AnalogIn
 
-  i2c = busio.I2C(board.SCL, board.SDA)
-  adc = ADS1015(i2c)
-  while True:
-      # channel 0
-      print(adc[0].value, adc[0].volts)
+    # Create the I2C bus
+    i2c = busio.I2C(board.SCL, board.SDA)
 
-Differential
-------------
+    # Create the ADC object using the I2C bus
+    ads = ADS.ADS1015(i2c)
 
-.. code-block:: python
+    # Create single-ended input on channel 0
+    chan = AnalogIn(ads, ADS.P0)
 
-  import board
-  import busio
-  from adafruit_ads1x15.differential import ADS1015
+    # Create differential input between channel 0 and 1
+    #chan = AnalogIn(ads, ADS.P0, ADS.P1)
 
-  i2c = busio.I2C(board.SCL, board.SDA)
-  adc = ADS1015(i2c)
-  while True:
-      # channel 0 - channel 1
-      print(adc[(0,1)].value, adc[(0,1)].volts)
+    print("{:>5}\t{:>5}".format('raw', 'v'))
 
+    while True:
+        print("{:>5}\t{:>5.3f}".format(chan.value, chan.voltage))
+        time.sleep(0.5)
 
 Contributing
 ============

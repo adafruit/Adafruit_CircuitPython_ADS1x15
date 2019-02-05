@@ -41,8 +41,6 @@ _ADS1X15_POINTER_CONVERSION         = const(0x00)
 _ADS1X15_POINTER_CONFIG             = const(0x01)
 _ADS1X15_CONFIG_OS_SINGLE           = const(0x8000)
 _ADS1X15_CONFIG_MUX_OFFSET          = const(12)
-_ADS1X15_CONFIG_MODE_CONTINUOUS     = const(0x0000)
-_ADS1X15_CONFIG_MODE_SINGLE         = const(0x0100)
 _ADS1X15_CONFIG_COMP_QUE_DISABLE    = const(0x0003)
 _ADS1X15_CONFIG_GAIN = {
     2/3: 0x0000,
@@ -54,10 +52,19 @@ _ADS1X15_CONFIG_GAIN = {
 }
 # pylint: enable=bad-whitespace
 
+class Mode:
+    """An enum-like class representing possible ADC operating modes."""
+    # See datasheet "Operating Modes" section
+    # values here are masks for setting MODE bit in Config Register
+    #pylint: disable=too-few-public-methods
+    CONTINUOUS = 0x0000
+    SINGLE = 0x0100
+
+
 class ADS1x15(object):
     """Base functionality for ADS1x15 analog to digital converters."""
 
-    def __init__(self, i2c, gain=1, data_rate=None, mode=_ADS1X15_CONFIG_MODE_SINGLE,
+    def __init__(self, i2c, gain=1, data_rate=None, mode=Mode.SINGLE,
                  address=_ADS1X15_DEFAULT_ADDRESS):
         #pylint: disable=too-many-arguments
         self.buf = bytearray(3)
@@ -115,7 +122,7 @@ class ADS1x15(object):
 
     @mode.setter
     def mode(self, mode):
-        if mode != _ADS1X15_CONFIG_MODE_CONTINUOUS and mode != _ADS1X15_CONFIG_MODE_SINGLE:
+        if mode != Mode.CONTINUOUS and mode != Mode.SINGLE:
             raise ValueError("Unsupported mode.")
         self._mode = mode
 

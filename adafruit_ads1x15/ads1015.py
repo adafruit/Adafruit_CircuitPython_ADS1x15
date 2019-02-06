@@ -28,7 +28,8 @@ CircuitPython driver for ADS1015 ADCs.
 * Author(s): Carter Nelson
 """
 import struct
-from .ads1x15 import ADS1x15
+#pylint: disable=unused-import
+from .ads1x15 import ADS1x15, Mode
 
 # Data sample rates
 _ADS1015_CONFIG_DR = {

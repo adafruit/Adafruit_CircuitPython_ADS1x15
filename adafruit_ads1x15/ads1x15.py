@@ -158,8 +158,9 @@ class ADS1x15(object):
         config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
-        while not self._conversion_complete():
-            time.sleep(0.01)
+        if self.mode == Mode.SINGLE:
+            while not self._conversion_complete():
+                pass
 
         return self.get_last_result()
 

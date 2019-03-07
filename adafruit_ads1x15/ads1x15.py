@@ -31,7 +31,6 @@ CircuitPython base class driver for ADS1015/1115 ADCs.
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
 
-import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 

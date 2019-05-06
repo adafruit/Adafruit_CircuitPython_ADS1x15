@@ -70,7 +70,7 @@ class AnalogIn():
     @property
     def value(self):
         """Returns the value of an ADC pin as an integer."""
-        return self._ads.read(self._pin_setting, is_differential=self.is_differential)
+        return self._ads.read(self._pin_setting, is_differential=self.is_differential) << (16 - self._ads.bits)
 
     @property
     def voltage(self):

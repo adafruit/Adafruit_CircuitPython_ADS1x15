@@ -31,7 +31,6 @@ CircuitPython base class driver for ADS1015/1115 ADCs.
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
 
-import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
@@ -158,8 +157,9 @@ class ADS1x15(object):
         config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
-        while not self._conversion_complete():
-            time.sleep(0.01)
+        if self.mode == Mode.SINGLE:
+            while not self._conversion_complete():
+                pass
 
         return self.get_last_result()
 

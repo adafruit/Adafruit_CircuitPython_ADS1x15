@@ -48,6 +48,8 @@ _ADS1X15_PGA_RANGE = {
 class AnalogIn():
     """AnalogIn Mock Implementation for ADC Reads."""
 
+    fast_read_channel = None
+
     def __init__(self, ads, positive_pin, negative_pin=None):
         """AnalogIn
 
@@ -70,8 +72,13 @@ class AnalogIn():
     @property
     def value(self):
         """Returns the value of an ADC pin as an integer."""
-        return self._ads.read(self._pin_setting,
-                              is_differential=self.is_differential) << (16 - self._ads.bits)
+        if AnalogIn.fast_read_channel is None:
+            fast = False
+        elif AnalogIn.fast_read_channel == self:
+            fast = True
+        else:
+            raise RuntimeError("Fast read in use by another channel.")
+        return self._ads.read(self._pin_setting, is_differential=self.is_differential, fast=fast)
 
     @property
     def voltage(self):
@@ -79,3 +86,14 @@ class AnalogIn():
         raw = self.value
         volts = raw * (_ADS1X15_PGA_RANGE[self._ads.gain] / (2**(self._ads.bits-1) - 1))
         return volts
+
+    def __enter__(self):
+        if AnalogIn.fast_read_channel is not None:
+            raise RuntimeError("Fast read in use by another channel.")
+        AnalogIn.fast_read_channel = self
+        # do a throw away read to set pointer register
+        self._ads.read(self._pin_setting, is_differential=self.is_differential)
+        return self
+
+    def __exit__(self, *exc):
+        AnalogIn.fast_read_channel = None

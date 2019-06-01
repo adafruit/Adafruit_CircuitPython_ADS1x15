@@ -152,6 +152,7 @@ class ADS1x15(object):
         """Perform an ADC read. Returns the signed integer result of the read."""
         fast = True
         if self._last_pin_read != pin:
+            self._last_pin_read = pin
             fast = False
             config = _ADS1X15_CONFIG_OS_SINGLE
             config |= (pin & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
@@ -165,7 +166,6 @@ class ADS1x15(object):
             while not self._conversion_complete():
                 pass
 
-        self._last_pin_read = pin
         return self._conversion_value(self.get_last_result(fast))
 
     def _conversion_complete(self):

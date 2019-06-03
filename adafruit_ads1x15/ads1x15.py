@@ -66,6 +66,7 @@ class ADS1x15(object):
     def __init__(self, i2c, gain=1, data_rate=None, mode=Mode.SINGLE,
                  address=_ADS1X15_DEFAULT_ADDRESS):
         #pylint: disable=too-many-arguments
+        self._last_pin_read = None
         self.buf = bytearray(3)
         self._data_rate = self._gain = self._mode = None
         self.gain = gain
@@ -149,19 +150,23 @@ class ADS1x15(object):
 
     def _read(self, pin):
         """Perform an ADC read. Returns the signed integer result of the read."""
-        config = _ADS1X15_CONFIG_OS_SINGLE
-        config |= (pin & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
-        config |= _ADS1X15_CONFIG_GAIN[self.gain]
-        config |= self.mode
-        config |= self.rate_config[self.data_rate]
-        config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
-        self._write_register(_ADS1X15_POINTER_CONFIG, config)
+        fast = True
+        if self._last_pin_read != pin:
+            self._last_pin_read = pin
+            fast = False
+            config = _ADS1X15_CONFIG_OS_SINGLE
+            config |= (pin & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
+            config |= _ADS1X15_CONFIG_GAIN[self.gain]
+            config |= self.mode
+            config |= self.rate_config[self.data_rate]
+            config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
+            self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
         if self.mode == Mode.SINGLE:
             while not self._conversion_complete():
                 pass
 
-        return self.get_last_result()
+        return self._conversion_value(self.get_last_result(fast))
 
     def _conversion_complete(self):
         """Return status of ADC conversion."""
@@ -170,11 +175,13 @@ class ADS1x15(object):
         # OS = 1: Device is not currently performing a conversion
         return self._read_register(_ADS1X15_POINTER_CONFIG) & 0x8000
 
-    def get_last_result(self):
+    def get_last_result(self, fast=False):
         """Read the last conversion result when in continuous conversion mode.
-        Will return a signed integer value.
+        Will return a signed integer value. If fast is True, the register
+        pointer is not updated as part of the read. This reduces I2C traffic
+        and increases possible read rate.
         """
-        return self._conversion_value(self._read_register(_ADS1X15_POINTER_CONVERSION))
+        return self._read_register(_ADS1X15_POINTER_CONVERSION, fast)
 
     def _write_register(self, reg, value):
         """Write 16 bit value to register."""
@@ -184,10 +191,14 @@ class ADS1x15(object):
         with self.i2c_device as i2c:
             i2c.write(self.buf)
 
-    def _read_register(self, reg):
-        """Read 16 bit register value."""
+    def _read_register(self, reg, fast=False):
+        """Read 16 bit register value. If fast is True, the pointer register
+        is not updated.
+        """
         self.buf[0] = reg
         with self.i2c_device as i2c:
-            i2c.write(self.buf, end=1, stop=False)
-            i2c.readinto(self.buf, end=2)
+            if fast:
+                i2c.readinto(self.buf, end=2)
+            else:
+                i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2, stop=False)
         return self.buf[0] << 8 | self.buf[1]

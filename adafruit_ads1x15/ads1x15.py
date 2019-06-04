@@ -151,7 +151,7 @@ class ADS1x15(object):
     def _read(self, pin):
         """Perform an ADC read. Returns the signed integer result of the read."""
         if self.mode == Mode.CONTINUOUS and self._last_pin_read == pin:
-             return self._conversion_value(self.get_last_result(True))
+            return self._conversion_value(self.get_last_result(True))
         else:
             self._last_pin_read = pin
             config = _ADS1X15_CONFIG_OS_SINGLE

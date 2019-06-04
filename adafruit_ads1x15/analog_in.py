@@ -76,6 +76,5 @@ class AnalogIn():
     @property
     def voltage(self):
         """Returns the voltage from the ADC pin as a floating point value."""
-        raw = self.value
-        volts = raw * (_ADS1X15_PGA_RANGE[self._ads.gain] / (2**(self._ads.bits-1) - 1))
+        volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
         return volts

@@ -150,10 +150,10 @@ class ADS1x15(object):
 
     def _read(self, pin):
         """Perform an ADC read. Returns the signed integer result of the read."""
-        fast = True
-        if self._last_pin_read != pin:
+        if self.mode == Mode.CONTINUOUS and self._last_pin_read == pin:
+             return self._conversion_value(self.get_last_result(True))
+        else:
             self._last_pin_read = pin
-            fast = False
             config = _ADS1X15_CONFIG_OS_SINGLE
             config |= (pin & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
             config |= _ADS1X15_CONFIG_GAIN[self.gain]
@@ -162,11 +162,11 @@ class ADS1x15(object):
             config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
             self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
-        if self.mode == Mode.SINGLE:
-            while not self._conversion_complete():
-                pass
+            if self.mode == Mode.SINGLE:
+                while not self._conversion_complete():
+                    pass
 
-        return self._conversion_value(self.get_last_result(fast))
+            return self._conversion_value(self.get_last_result(False))
 
     def _conversion_complete(self):
         """Return status of ADC conversion."""
@@ -195,7 +195,6 @@ class ADS1x15(object):
         """Read 16 bit register value. If fast is True, the pointer register
         is not updated.
         """
-        self.buf[0] = reg
         with self.i2c_device as i2c:
             if fast:
                 i2c.readinto(self.buf, end=2)

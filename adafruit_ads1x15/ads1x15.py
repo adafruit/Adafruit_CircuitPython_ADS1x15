@@ -199,5 +199,5 @@ class ADS1x15(object):
             if fast:
                 i2c.readinto(self.buf, end=2)
             else:
-                i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2, stop=False)
+                i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2)
         return self.buf[0] << 8 | self.buf[1]

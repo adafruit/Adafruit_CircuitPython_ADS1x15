@@ -9,8 +9,8 @@ Introduction
     :target: https://adafru.it/discord
     :alt: Discord
 
-.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_ADS1x15.svg?branch=master
-    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_ADS1x15
+.. image:: https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15/workflows/Build%20CI/badge.svg
+    :target: https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15/actions/
     :alt: Build Status
 
 Support for the ADS1x15 series of analog-to-digital converters. Available in 12-bit (ADS1015)

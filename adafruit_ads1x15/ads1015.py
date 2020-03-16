@@ -28,18 +28,19 @@ CircuitPython driver for ADS1015 ADCs.
 * Author(s): Carter Nelson
 """
 import struct
-#pylint: disable=unused-import
+
+# pylint: disable=unused-import
 from .ads1x15 import ADS1x15, Mode
 
 # Data sample rates
 _ADS1015_CONFIG_DR = {
-    128:   0x0000,
-    250:   0x0020,
-    490:   0x0040,
-    920:   0x0060,
-    1600:  0x0080,
-    2400:  0x00A0,
-    3300:  0x00C0
+    128: 0x0000,
+    250: 0x0020,
+    490: 0x0040,
+    920: 0x0060,
+    1600: 0x0080,
+    2400: 0x00A0,
+    3300: 0x00C0,
 }
 
 # Pins
@@ -47,6 +48,7 @@ P0 = 0
 P1 = 1
 P2 = 2
 P3 = 3
+
 
 class ADS1015(ADS1x15):
     """Class for the ADS1015 12 bit ADC."""

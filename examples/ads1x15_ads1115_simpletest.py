@@ -10,15 +10,15 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # Create the ADC object using the I2C bus
 ads = ADS.ADS1115(i2c)
 # you can specify an I2C adress instead of the default 0x48
-#ads = ADS.ADS1115(i2c, address=0x49)
+# ads = ADS.ADS1115(i2c, address=0x49)
 
 # Create single-ended input on channel 0
 chan = AnalogIn(ads, ADS.P0)
 
 # Create differential input between channel 0 and 1
-#chan = AnalogIn(ads, ADS.P0, ADS.P1)
+# chan = AnalogIn(ads, ADS.P0, ADS.P1)
 
-print("{:>5}\t{:>5}".format('raw', 'v'))
+print("{:>5}\t{:>5}".format("raw", "v"))
 
 while True:
     print("{:>5}\t{:>5.3f}".format(chan.value, chan.voltage))

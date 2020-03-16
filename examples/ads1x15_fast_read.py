@@ -22,7 +22,7 @@ chan0 = AnalogIn(ads, ADS.P0)
 ads.mode = Mode.CONTINUOUS
 ads.data_rate = RATE
 
-data = [None]*SAMPLES
+data = [None] * SAMPLES
 
 start = time.monotonic()
 

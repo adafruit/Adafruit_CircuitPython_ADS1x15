@@ -31,6 +31,7 @@ CircuitPython base class driver for ADS1015/1115 ADCs.
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
 
+import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
@@ -161,7 +162,10 @@ class ADS1x15:
         if self.mode == Mode.CONTINUOUS and self._last_pin_read == pin:
             return self._conversion_value(self.get_last_result(True))
         self._last_pin_read = pin
-        config = _ADS1X15_CONFIG_OS_SINGLE
+        if self.mode == Mode.SINGLE:
+            config = _ADS1X15_CONFIG_OS_SINGLE
+        else:
+            config = 0
         config |= (pin & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode
@@ -170,8 +174,12 @@ class ADS1x15:
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
         if self.mode == Mode.SINGLE:
+            # poll conversion complete status bit
             while not self._conversion_complete():
                 pass
+        else:
+            # just sleep (can't poll in continuous)
+            time.sleep(2 / self.data_rate)
 
         return self._conversion_value(self.get_last_result(False))
 

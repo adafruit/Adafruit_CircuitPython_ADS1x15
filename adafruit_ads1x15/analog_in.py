@@ -28,10 +28,8 @@ differential ADC readings.
 * Author(s): Carter Nelson, adapted from MCP3xxx original by Brent Rubell
 """
 
-# pylint: disable=bad-whitespace
 _ADS1X15_DIFF_CHANNELS = {(0, 1): 0, (0, 3): 1, (1, 3): 2, (2, 3): 3}
 _ADS1X15_PGA_RANGE = {2 / 3: 6.144, 1: 4.096, 2: 2.048, 4: 1.024, 8: 0.512, 16: 0.256}
-# pylint: enable=bad-whitespace
 
 
 class AnalogIn:

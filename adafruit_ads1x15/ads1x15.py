@@ -35,7 +35,6 @@ import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
-# pylint: disable=bad-whitespace
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)
 _ADS1X15_POINTER_CONFIG = const(0x01)
@@ -50,7 +49,6 @@ _ADS1X15_CONFIG_GAIN = {
     8: 0x0800,
     16: 0x0A00,
 }
-# pylint: enable=bad-whitespace
 
 
 class Mode:

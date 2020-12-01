@@ -32,7 +32,7 @@ start = time.monotonic()
 for i in range(SAMPLES):
     data[i] = chan0.value
     # Detect repeated values due to over polling
-    if data[i] == data[i-1]:
+    if data[i] == data[i - 1]:
         repeats += 1
 
 
@@ -40,7 +40,7 @@ end = time.monotonic()
 total_time = end - start
 
 rate_reported = SAMPLES / total_time
-rate_actual = (SAMPLES-repeats) / total_time
+rate_actual = (SAMPLES - repeats) / total_time
 # NOTE: leave input floating to pickup some random noise, this cannot estimate conversion rates higher than polling rate
 
 print("Took {:5.3f} s to acquire {:d} samples.".format(total_time, SAMPLES))

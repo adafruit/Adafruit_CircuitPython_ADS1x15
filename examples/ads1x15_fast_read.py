@@ -22,6 +22,8 @@ chan0 = AnalogIn(ads, ADS.P0)
 ads.mode = Mode.CONTINUOUS
 ads.data_rate = RATE
 
+repeats = 0
+
 data = [None] * SAMPLES
 
 start = time.monotonic()
@@ -29,9 +31,27 @@ start = time.monotonic()
 # Read the same channel over and over
 for i in range(SAMPLES):
     data[i] = chan0.value
+    # Detect repeated values due to over polling
+    if data[i] == data[i - 1]:
+        repeats += 1
+
 
 end = time.monotonic()
 total_time = end - start
 
-print("Time of capture: {}s".format(total_time))
-print("Sample rate requested={} actual={}".format(RATE, SAMPLES / total_time))
+rate_reported = SAMPLES / total_time
+rate_actual = (SAMPLES - repeats) / total_time
+# NOTE: leave input floating to pickup some random noise
+#       This cannot estimate conversion rates higher than polling rate
+
+print("Took {:5.3f} s to acquire {:d} samples.".format(total_time, SAMPLES))
+print("")
+print("Configured:")
+print("    Requested       = {:5d}    sps".format(RATE))
+print("    Reported        = {:5d}    sps".format(ads.data_rate))
+print("")
+print("Actual:")
+print("    Polling Rate    = {:8.2f} sps".format(rate_reported))
+print("                      {:9.2%}".format(rate_reported / RATE))
+print("    Repeats         = {:5d}".format(repeats))
+print("    Conversion Rate = {:8.2f} sps   (estimated)".format(rate_actual))

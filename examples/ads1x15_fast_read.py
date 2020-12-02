@@ -54,4 +54,3 @@ print("    Polling Rate    = {:8.2f} sps".format(rate_reported))
 print("                      {:9.2%}".format(rate_reported / RATE))
 print("    Repeats         = {:5d}".format(repeats))
 print("    Conversion Rate = {:8.2f} sps   (estimated)".format(rate_actual))
-

@@ -157,14 +157,16 @@ class ADS1x15:
 
     def _read(self, pin):
         """Perform an ADC read. Returns the signed integer result of the read."""
-        # Immediately return conversion register result if in CONTINUOUS mode and pin has not changed
+        # Immediately return conversion register result if in CONTINUOUS mode
+        # and pin has not changed
         if self.mode == Mode.CONTINUOUS and self._last_pin_read == pin:
             return self._conversion_value(self.get_last_result(True))
 
         # Assign last pin read if in SINGLE mode or first sample in CONTINUOUS mode on this pin
         self._last_pin_read = pin
 
-        # Configure ADC every time before a conversion in SINGLE mode or changing channels in CONTINUOUS mode
+        # Configure ADC every time before a conversion in SINGLE mode 
+        # or changing channels in CONTINUOUS mode
         if self.mode == Mode.SINGLE:
             config = _ADS1X15_CONFIG_OS_SINGLE
         else:

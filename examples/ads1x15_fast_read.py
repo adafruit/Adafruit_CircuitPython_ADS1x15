@@ -41,7 +41,8 @@ total_time = end - start
 
 rate_reported = SAMPLES / total_time
 rate_actual = (SAMPLES - repeats) / total_time
-# NOTE: leave input floating to pickup some random noise, this cannot estimate conversion rates higher than polling rate
+# NOTE: leave input floating to pickup some random noise
+#       This cannot estimate conversion rates higher than polling rate
 
 print("Took {:5.3f} s to acquire {:d} samples.".format(total_time, SAMPLES))
 print("")

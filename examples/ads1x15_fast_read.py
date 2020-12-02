@@ -10,6 +10,9 @@ RATE = 3300
 SAMPLES = 1000
 
 # Create the I2C bus with a fast frequency
+# NOTE: Your device may not respect the frequency setting
+#       Raspberry Pis must change this in /boot/config.txt
+
 i2c = busio.I2C(board.SCL, board.SDA, frequency=1000000)
 
 # Create the ADC object using the I2C bus
@@ -26,15 +29,22 @@ repeats = 0
 
 data = [None] * SAMPLES
 
+time_last_sample = time.monotonic()
 start = time.monotonic()
 
 # Read the same channel over and over
 for i in range(SAMPLES):
+    # Wait for expected conversion finish time
+    while time.monotonic() < (time_last_sample + (1.0 / ads.data_rate)):
+        pass
+
+    # Read conversion value for ADC channel
+    time_last_sample = time.monotonic()
     data[i] = chan0.value
+
     # Detect repeated values due to over polling
     if data[i] == data[i - 1]:
         repeats += 1
-
 
 end = time.monotonic()
 total_time = end - start

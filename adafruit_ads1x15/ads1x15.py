@@ -224,3 +224,4 @@ class ADS1x15:
             else:
                 i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2)
         return self.buf[0] << 8 | self.buf[1]
+

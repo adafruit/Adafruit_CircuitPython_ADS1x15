@@ -165,7 +165,7 @@ class ADS1x15:
         # Assign last pin read if in SINGLE mode or first sample in CONTINUOUS mode on this pin
         self._last_pin_read = pin
 
-        # Configure ADC every time before a conversion in SINGLE mode 
+        # Configure ADC every time before a conversion in SINGLE mode
         # or changing channels in CONTINUOUS mode
         if self.mode == Mode.SINGLE:
             config = _ADS1X15_CONFIG_OS_SINGLE
@@ -224,4 +224,3 @@ class ADS1x15:
             else:
                 i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2)
         return self.buf[0] << 8 | self.buf[1]
-

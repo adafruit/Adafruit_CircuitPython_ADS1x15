@@ -25,22 +25,31 @@ chan0 = AnalogIn(ads, ADS.P0)
 ads.mode = Mode.CONTINUOUS
 ads.data_rate = RATE
 
+sample_interval = 1.0 / ads.data_rate
+
 repeats = 0
+skips = 0
 
 data = [None] * SAMPLES
 
-time_last_sample = time.monotonic()
+time_next_sample = time.monotonic()
 start = time.monotonic()
 
 # Read the same channel over and over
 for i in range(SAMPLES):
     # Wait for expected conversion finish time
-    while time.monotonic() < (time_last_sample + (1.0 / ads.data_rate)):
+    while time.monotonic() < (time_next_sample):
         pass
 
     # Read conversion value for ADC channel
-    time_last_sample = time.monotonic()
     data[i] = chan0.value
+
+    # Loop timing
+    time_last_sample = time.monotonic()
+    time_next_sample = time_next_sample + sample_interval
+    if time_last_sample > (time_next_sample + sample_interval):
+        skips += 1
+        time_next_sample = time.monotonic() + sample_interval
 
     # Detect repeated values due to over polling
     if data[i] == data[i - 1]:
@@ -63,5 +72,6 @@ print("")
 print("Actual:")
 print("    Polling Rate    = {:8.2f} sps".format(rate_reported))
 print("                      {:9.2%}".format(rate_reported / RATE))
+print("    Skipped         = {:5d}".format(skips))
 print("    Repeats         = {:5d}".format(repeats))
 print("    Conversion Rate = {:8.2f} sps   (estimated)".format(rate_actual))

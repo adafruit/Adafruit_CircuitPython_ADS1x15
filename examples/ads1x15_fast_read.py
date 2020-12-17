@@ -27,7 +27,7 @@ ads.data_rate = RATE
 
 # First ADC channel read in continuous mode configures device
 # and waits 2 conversion cycles
-chan0.value
+_ = chan0.value
 
 sample_interval = 1.0 / ads.data_rate
 

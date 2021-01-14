@@ -26,7 +26,7 @@ Table of Contents
 .. toctree::
     :caption: Related Products
 
-    ADS1015 12-Bit ADC - 4 Channel with Programmable Gain Amplifier <https://www.adafruit.com/product/1083> 
+    ADS1015 12-Bit ADC - 4 Channel with Programmable Gain Amplifier <https://www.adafruit.com/product/1083>
 
     ADS1115 16-Bit ADC - 4 Channel with Programmable Gain Amplifier <https://www.adafruit.com/product/1085>
 

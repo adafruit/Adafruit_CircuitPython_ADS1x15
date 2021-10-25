@@ -86,6 +86,11 @@ Single Ended
         print("{:>5}\t{:>5.3f}".format(chan.value, chan.voltage))
         time.sleep(0.5)
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/ads1x15/en/latest/>`_.
+
 Contributing
 ============
 

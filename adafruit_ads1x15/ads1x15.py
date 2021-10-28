@@ -18,6 +18,13 @@ import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 
+try:
+    from typing import Optional
+    from busio import I2C
+    from microcontroller import Pin
+except ImportError:
+    pass
+
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)
 _ADS1X15_POINTER_CONFIG = const(0x01)
@@ -49,11 +56,11 @@ class ADS1x15:
 
     def __init__(
         self,
-        i2c,
-        gain=1,
-        data_rate=None,
-        mode=Mode.SINGLE,
-        address=_ADS1X15_DEFAULT_ADDRESS,
+        i2c: I2C,
+        gain: float = 1,
+        data_rate: Optional[int] = None,
+        mode: Mode = Mode.SINGLE,
+        address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
         self._last_pin_read = None
@@ -70,7 +77,7 @@ class ADS1x15:
         return self._data_rate
 
     @data_rate.setter
-    def data_rate(self, rate):
+    def data_rate(self, rate: int):
         possible_rates = self.rates
         if rate not in possible_rates:
             raise ValueError("Data rate must be one of: {}".format(possible_rates))
@@ -92,7 +99,7 @@ class ADS1x15:
         return self._gain
 
     @gain.setter
-    def gain(self, gain):
+    def gain(self, gain: float):
         possible_gains = self.gains
         if gain not in possible_gains:
             raise ValueError("Gain must be one of: {}".format(possible_gains))
@@ -111,12 +118,12 @@ class ADS1x15:
         return self._mode
 
     @mode.setter
-    def mode(self, mode):
+    def mode(self, mode: Mode):
         if mode not in (Mode.CONTINUOUS, Mode.SINGLE):
             raise ValueError("Unsupported mode.")
         self._mode = mode
 
-    def read(self, pin, is_differential=False):
+    def read(self, pin: Pin, is_differential: bool = False) -> int:
         """I2C Interface for ADS1x15-based ADCs reads.
 
         params:
@@ -126,19 +133,19 @@ class ADS1x15:
         pin = pin if is_differential else pin + 0x04
         return self._read(pin)
 
-    def _data_rate_default(self):
+    def _data_rate_default(self) -> int:
         """Retrieve the default data rate for this ADC (in samples per second).
         Should be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement _data_rate_default!")
 
-    def _conversion_value(self, raw_adc):
+    def _conversion_value(self, raw_adc: int) -> int:
         """Subclasses should override this function that takes the 16 raw ADC
         values of a conversion result and returns a signed integer value.
         """
         raise NotImplementedError("Subclass must implement _conversion_value function!")
 
-    def _read(self, pin):
+    def _read(self, pin: Pin) -> int:
         """Perform an ADC read. Returns the signed integer result of the read."""
         # Immediately return conversion register result if in CONTINUOUS mode
         # and pin has not changed
@@ -174,14 +181,14 @@ class ADS1x15:
 
         return self._conversion_value(self.get_last_result(False))
 
-    def _conversion_complete(self):
+    def _conversion_complete(self) -> int:
         """Return status of ADC conversion."""
         # OS is bit 15
         # OS = 0: Device is currently performing a conversion
         # OS = 1: Device is not currently performing a conversion
         return self._read_register(_ADS1X15_POINTER_CONFIG) & 0x8000
 
-    def get_last_result(self, fast=False):
+    def get_last_result(self, fast: bool = False) -> int:
         """Read the last conversion result when in continuous conversion mode.
         Will return a signed integer value. If fast is True, the register
         pointer is not updated as part of the read. This reduces I2C traffic
@@ -189,7 +196,7 @@ class ADS1x15:
         """
         return self._read_register(_ADS1X15_POINTER_CONVERSION, fast)
 
-    def _write_register(self, reg, value):
+    def _write_register(self, reg: int, value: int):
         """Write 16 bit value to register."""
         self.buf[0] = reg
         self.buf[1] = (value >> 8) & 0xFF
@@ -197,7 +204,7 @@ class ADS1x15:
         with self.i2c_device as i2c:
             i2c.write(self.buf)
 
-    def _read_register(self, reg, fast=False):
+    def _read_register(self, reg: int, fast: bool = False) -> int:
         """Read 16 bit register value. If fast is True, the pointer register
         is not updated.
         """

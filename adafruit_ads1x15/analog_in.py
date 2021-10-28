@@ -11,10 +11,9 @@ differential ADC readings.
 * Author(s): Carter Nelson, adapted from MCP3xxx original by Brent Rubell
 """
 
-from .ads1x15 import ADS1x15
-
 try:
     from typing import Optional
+    from .ads1x15 import ADS1x15
 except ImportError:
     pass
 

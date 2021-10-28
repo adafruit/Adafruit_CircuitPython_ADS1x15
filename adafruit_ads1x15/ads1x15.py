@@ -17,11 +17,11 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
 import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
-from busio import I2C
-from microcontroller import Pin
 
 try:
     from typing import Optional
+    from busio import I2C
+    from microcontroller import Pin
 except ImportError:
     pass
 
@@ -58,7 +58,7 @@ class ADS1x15:
         self,
         i2c: I2C,
         gain: float = 1,
-        data_rate: Optional[float] = None,
+        data_rate: Optional[int] = None,
         mode: Mode = Mode.SINGLE,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
@@ -77,7 +77,7 @@ class ADS1x15:
         return self._data_rate
 
     @data_rate.setter
-    def data_rate(self, rate: float):
+    def data_rate(self, rate: int):
         possible_rates = self.rates
         if rate not in possible_rates:
             raise ValueError("Data rate must be one of: {}".format(possible_rates))

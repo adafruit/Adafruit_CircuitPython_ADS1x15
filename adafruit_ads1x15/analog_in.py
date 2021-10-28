@@ -11,9 +11,9 @@ differential ADC readings.
 * Author(s): Carter Nelson, adapted from MCP3xxx original by Brent Rubell
 """
 
+from .ads1x15 import ADS1x15
 try:
     from typing import Optional
-    from .ads1x15 import ADS1x15
 except ImportError:
     pass
 
@@ -24,9 +24,7 @@ _ADS1X15_PGA_RANGE = {2 / 3: 6.144, 1: 4.096, 2: 2.048, 4: 1.024, 8: 0.512, 16: 
 class AnalogIn:
     """AnalogIn Mock Implementation for ADC Reads."""
 
-    def __init__(
-        self, ads: ADS1x15, positive_pin: int, negative_pin: Optional[int] = None
-    ):
+    def __init__(self, ads: ADS1x15, positive_pin: int, negative_pin: Optional[int] = None):
         """AnalogIn
 
         :param ads: The ads object.

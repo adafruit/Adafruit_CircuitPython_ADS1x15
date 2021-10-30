@@ -73,7 +73,7 @@ class ADS1x15:
     def data_rate(self, rate):
         possible_rates = self.rates
         if rate not in possible_rates:
-            raise ValueError("Data rate must be one of: {}".format(possible_rates))
+            raise ValueError(f"Data rate must be one of: {possible_rates}")
         self._data_rate = rate
 
     @property
@@ -95,7 +95,7 @@ class ADS1x15:
     def gain(self, gain):
         possible_gains = self.gains
         if gain not in possible_gains:
-            raise ValueError("Gain must be one of: {}".format(possible_gains))
+            raise ValueError(f"Gain must be one of: {possible_gains}")
         self._gain = gain
 
     @property

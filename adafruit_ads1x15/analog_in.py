@@ -32,10 +32,9 @@ class AnalogIn:
         if negative_pin is not None:
             pins = (self._pin_setting, self._negative_pin)
             if pins not in _ADS1X15_DIFF_CHANNELS:
+                possible_keys = list(_ADS1X15_DIFF_CHANNELS.keys())
                 raise ValueError(
-                    "Differential channels must be one of: {}".format(
-                        list(_ADS1X15_DIFF_CHANNELS.keys())
-                    )
+                    f"Differential channels must be one of: {possible_keys}"
                 )
             self._pin_setting = _ADS1X15_DIFF_CHANNELS[pins]
             self.is_differential = True

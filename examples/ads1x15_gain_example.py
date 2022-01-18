@@ -16,7 +16,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # ads = ADS.ADS1015(i2c)
 ads = ADS.ADS1115(i2c)
 
-# Create a sinlge ended channel on Pin 0
+# Create a single-ended channel on Pin 0
 #   Max counts for ADS1015 = 2047
 #                  ADS1115 = 32767
 chan = AnalogIn(ads, ADS.P0)

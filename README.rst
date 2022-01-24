@@ -2,7 +2,7 @@ Introduction
 ============
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-ads1x15/badge/?version=latest
-    :target: https://circuitpython.readthedocs.io/projects/ads1x15/en/latest/
+    :target: https://docs.circuitpython.org/projects/ads1x15/en/latest/
     :alt: Documentation Status
 
 .. image :: https://img.shields.io/discord/327254708534116352.svg
@@ -89,7 +89,7 @@ Single Ended
 Documentation
 =============
 
-API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/ads1x15/en/latest/>`_.
+API documentation for this library can be found on `Read the Docs <https://docs.circuitpython.org/projects/ads1x15/en/latest/>`_.
 
 Contributing
 ============

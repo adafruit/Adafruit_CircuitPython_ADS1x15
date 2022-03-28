@@ -48,11 +48,21 @@ class Mode:
     # values here are masks for setting MODE bit in Config Register
     # pylint: disable=too-few-public-methods
     CONTINUOUS = 0x0000
+    """Continuous Mode"""
     SINGLE = 0x0100
+    """Single-Shot Mode"""
 
 
 class ADS1x15:
-    """Base functionality for ADS1x15 analog to digital converters."""
+    """Base functionality for ADS1x15 analog to digital converters.
+
+    :param ~busio.I2C i2c: The I2C bus the device is connected to.
+    :param float gain: The ADC gain.
+    :param int data_rate: The data rate for ADC conversion in samples per second.
+                          Default value depends on the device.
+    :param Mode mode: The conversion mode, defaults to `Mode.SINGLE`.
+    :param int address: The I2C address of the device.
+    """
 
     def __init__(
         self,

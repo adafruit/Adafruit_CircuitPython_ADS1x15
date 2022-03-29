@@ -28,9 +28,13 @@ _ADS1015_CONFIG_DR = {
 
 # Pins
 P0 = 0
+"""Analog Pin 0"""
 P1 = 1
+"""Analog Pin 1"""
 P2 = 2
+"""Analog Pin 2"""
 P3 = 3
+"""Analog Pin 3"""
 
 
 class ADS1015(ADS1x15):

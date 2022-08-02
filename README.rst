@@ -13,6 +13,10 @@ Introduction
     :target: https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15/actions/
     :alt: Build Status
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: Code Style: Black
+
 Support for the ADS1x15 series of analog-to-digital converters. Available in 12-bit (ADS1015)
 and 16-bit (ADS1115) versions.
 

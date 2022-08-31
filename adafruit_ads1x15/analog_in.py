@@ -12,7 +12,8 @@ differential ADC readings.
 """
 
 try:
-    from typing import Optional
+    from typing import Optional, cast
+
     from .ads1x15 import ADS1x15
 except ImportError:
     pass
@@ -37,7 +38,7 @@ class AnalogIn:
         self._negative_pin = negative_pin
         self.is_differential = False
         if negative_pin is not None:
-            pins = (self._pin_setting, self._negative_pin)
+            pins = (self._pin_setting, cast(int, self._negative_pin))
             if pins not in _ADS1X15_DIFF_CHANNELS:
                 raise ValueError(
                     "Differential channels must be one of: {}".format(

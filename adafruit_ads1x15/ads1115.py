@@ -62,6 +62,5 @@ class ADS1115(ADS1x15):
         return 128
 
     def _conversion_value(self, raw_adc: int) -> int:
-        raw_adc = raw_adc.to_bytes(2, "big")
-        value = struct.unpack(">h", raw_adc)[0]
+        value = struct.unpack(">h", raw_adc.to_bytes(2, "big"))[0]
         return value

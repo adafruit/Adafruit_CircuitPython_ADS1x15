@@ -15,11 +15,13 @@ __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ADS1x15.git"
 
 import time
-from micropython import const
+
 from adafruit_bus_device.i2c_device import I2CDevice
+from micropython import const
 
 try:
     from typing import Optional
+
     from busio import I2C
     from microcontroller import Pin
 except ImportError:
@@ -69,15 +71,17 @@ class ADS1x15:
         i2c: I2C,
         gain: float = 1,
         data_rate: Optional[int] = None,
-        mode: Mode = Mode.SINGLE,
+        mode: int = Mode.SINGLE,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
         self._last_pin_read = None
         self.buf = bytearray(3)
-        self._data_rate = self._gain = self._mode = None
+        self._gain:float
         self.gain = gain
+        self._data_rate: int
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
+        self._mode:int
         self.mode = mode
         self.i2c_device = I2CDevice(i2c, address)
 
@@ -128,7 +132,7 @@ class ADS1x15:
         return self._mode
 
     @mode.setter
-    def mode(self, mode: Mode):
+    def mode(self, mode: int):
         if mode not in (Mode.CONTINUOUS, Mode.SINGLE):
             raise ValueError("Unsupported mode.")
         self._mode = mode

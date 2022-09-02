@@ -20,7 +20,7 @@ from adafruit_bus_device.i2c_device import I2CDevice
 from micropython import const
 
 try:
-    from typing import Optional
+    from typing import Optional, List, Dict
 
     from busio import I2C
     from microcontroller import Pin
@@ -103,12 +103,12 @@ class ADS1x15:
         self._data_rate = rate
 
     @property
-    def rates(self) -> list[int]:
+    def rates(self) -> List[int]:
         """Possible data rate settings."""
         raise NotImplementedError("Subclass must implement rates property.")
 
     @property
-    def rate_config(self) -> dict[int, int]:
+    def rate_config(self) -> Dict[int, int]:
         """Rate configuration masks."""
         raise NotImplementedError("Subclass must implement rate_config property.")
 
@@ -125,7 +125,7 @@ class ADS1x15:
         self._gain = gain
 
     @property
-    def gains(self) -> list[float]:
+    def gains(self) -> List[float]:
         """Possible gain settings."""
         g = list(_ADS1X15_CONFIG_GAIN.keys())
         g.sort()

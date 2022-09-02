@@ -11,6 +11,7 @@ CircuitPython driver for 1115 ADCs.
 * Author(s): Carter Nelson
 """
 import struct
+from typing import Dict, List
 
 # pylint: disable=unused-import
 from .ads1x15 import ADS1x15, Mode
@@ -47,14 +48,14 @@ class ADS1115(ADS1x15):
         return 16
 
     @property
-    def rates(self) -> list[int]:
+    def rates(self) -> List[int]:
         """Possible data rate settings."""
         r = list(_ADS1115_CONFIG_DR.keys())
         r.sort()
         return r
 
     @property
-    def rate_config(self) -> dict[int, int]:
+    def rate_config(self) -> Dict[int, int]:
         """Rate configuration masks."""
         return _ADS1115_CONFIG_DR
 

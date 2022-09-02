@@ -41,19 +41,19 @@ class ADS1015(ADS1x15):
     """Class for the ADS1015 12 bit ADC."""
 
     @property
-    def bits(self):
+    def bits(self) -> int:
         """The ADC bit resolution."""
         return 12
 
     @property
-    def rates(self):
+    def rates(self) -> list[int]:
         """Possible data rate settings."""
         r = list(_ADS1015_CONFIG_DR.keys())
         r.sort()
         return r
 
     @property
-    def rate_config(self):
+    def rate_config(self) -> dict[int, int]:
         """Rate configuration masks."""
         return _ADS1015_CONFIG_DR
 

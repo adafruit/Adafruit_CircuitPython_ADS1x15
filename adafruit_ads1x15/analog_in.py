@@ -12,8 +12,7 @@ differential ADC readings.
 """
 
 try:
-    from typing import Optional, cast
-
+    from typing import Optional
     from .ads1x15 import ADS1x15
 except ImportError:
     pass
@@ -38,7 +37,7 @@ class AnalogIn:
         self._negative_pin = negative_pin
         self.is_differential = False
         if negative_pin is not None:
-            pins = (self._pin_setting, cast(int, self._negative_pin))
+            pins = (self._pin_setting, self._negative_pin)
             if pins not in _ADS1X15_DIFF_CHANNELS:
                 raise ValueError(
                     "Differential channels must be one of: {}".format(
@@ -49,14 +48,14 @@ class AnalogIn:
             self.is_differential = True
 
     @property
-    def value(self):
+    def value(self) -> int:
         """Returns the value of an ADC pin as an integer."""
         return self._ads.read(
             self._pin_setting, is_differential=self.is_differential
         ) << (16 - self._ads.bits)
 
     @property
-    def voltage(self):
+    def voltage(self) -> float:
         """Returns the voltage from the ADC pin as a floating point value."""
         volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
         return volts

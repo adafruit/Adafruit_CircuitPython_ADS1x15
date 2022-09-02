@@ -86,53 +86,58 @@ class ADS1x15:
         self.i2c_device = I2CDevice(i2c, address)
 
     @property
-    def data_rate(self):
+    def bits(self) -> int:
+        """The ADC bit resolution."""
+        raise NotImplementedError("Subclass must implement bits property.")
+
+    @property
+    def data_rate(self) -> int:
         """The data rate for ADC conversion in samples per second."""
         return self._data_rate
 
     @data_rate.setter
-    def data_rate(self, rate: int):
+    def data_rate(self, rate: int) -> None:
         possible_rates = self.rates
         if rate not in possible_rates:
             raise ValueError("Data rate must be one of: {}".format(possible_rates))
         self._data_rate = rate
 
     @property
-    def rates(self):
+    def rates(self) -> list[int]:
         """Possible data rate settings."""
         raise NotImplementedError("Subclass must implement rates property.")
 
     @property
-    def rate_config(self):
+    def rate_config(self) -> dict[int, int]:
         """Rate configuration masks."""
         raise NotImplementedError("Subclass must implement rate_config property.")
 
     @property
-    def gain(self):
+    def gain(self) -> float:
         """The ADC gain."""
         return self._gain
 
     @gain.setter
-    def gain(self, gain: float):
+    def gain(self, gain: float) -> None:
         possible_gains = self.gains
         if gain not in possible_gains:
             raise ValueError("Gain must be one of: {}".format(possible_gains))
         self._gain = gain
 
     @property
-    def gains(self):
+    def gains(self) -> list[float]:
         """Possible gain settings."""
         g = list(_ADS1X15_CONFIG_GAIN.keys())
         g.sort()
         return g
 
     @property
-    def mode(self):
+    def mode(self) -> int:
         """The ADC conversion mode."""
         return self._mode
 
     @mode.setter
-    def mode(self, mode: int):
+    def mode(self, mode: int) -> None:
         if mode not in (Mode.CONTINUOUS, Mode.SINGLE):
             raise ValueError("Unsupported mode.")
         self._mode = mode

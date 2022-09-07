@@ -77,11 +77,8 @@ class ADS1x15:
         # pylint: disable=too-many-arguments
         self._last_pin_read = None
         self.buf = bytearray(3)
-        self._gain = gain
         self.gain = gain
-        self._data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
-        self._mode = mode
         self.mode = mode
         self.i2c_device = I2CDevice(i2c, address)
 

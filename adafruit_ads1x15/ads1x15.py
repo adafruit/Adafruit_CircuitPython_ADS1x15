@@ -20,7 +20,7 @@ from adafruit_bus_device.i2c_device import I2CDevice
 from micropython import const
 
 try:
-    from typing import Dict, List, Literal, Optional, Union
+    from typing import Dict, List, Optional
 
     from busio import I2C
     from microcontroller import Pin
@@ -83,7 +83,7 @@ class ADS1x15:
         self.i2c_device = I2CDevice(i2c, address)
 
     @property
-    def bits(self) -> Union[Literal[12], Literal[16]]:
+    def bits(self) -> int:
         """The ADC bit resolution."""
         raise NotImplementedError("Subclass must implement bits property.")
 

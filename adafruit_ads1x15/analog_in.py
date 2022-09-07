@@ -48,14 +48,14 @@ class AnalogIn:
             self.is_differential = True
 
     @property
-    def value(self):
+    def value(self) -> int:
         """Returns the value of an ADC pin as an integer."""
         return self._ads.read(
             self._pin_setting, is_differential=self.is_differential
         ) << (16 - self._ads.bits)
 
     @property
-    def voltage(self):
+    def voltage(self) -> float:
         """Returns the voltage from the ADC pin as a floating point value."""
         volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
         return volts

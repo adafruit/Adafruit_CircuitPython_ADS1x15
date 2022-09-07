@@ -12,6 +12,13 @@ CircuitPython driver for 1115 ADCs.
 """
 import struct
 
+try:
+    from typing import Dict, List
+
+    from typing_extensions import Literal
+except ImportError:
+    pass
+
 # pylint: disable=unused-import
 from .ads1x15 import ADS1x15, Mode
 
@@ -42,26 +49,25 @@ class ADS1115(ADS1x15):
     """Class for the ADS1115 16 bit ADC."""
 
     @property
-    def bits(self):
+    def bits(self) -> Literal[16]:
         """The ADC bit resolution."""
         return 16
 
     @property
-    def rates(self):
+    def rates(self) -> List[int]:
         """Possible data rate settings."""
         r = list(_ADS1115_CONFIG_DR.keys())
         r.sort()
         return r
 
     @property
-    def rate_config(self):
+    def rate_config(self) -> Dict[int, int]:
         """Rate configuration masks."""
         return _ADS1115_CONFIG_DR
 
-    def _data_rate_default(self) -> int:
+    def _data_rate_default(self) -> Literal[128]:
         return 128
 
     def _conversion_value(self, raw_adc: int) -> int:
-        raw_adc = raw_adc.to_bytes(2, "big")
-        value = struct.unpack(">h", raw_adc)[0]
+        value = struct.unpack(">h", raw_adc.to_bytes(2, "big"))[0]
         return value

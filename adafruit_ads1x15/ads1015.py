@@ -64,7 +64,7 @@ class ADS1015(ADS1x15):
         """Rate configuration masks."""
         return _ADS1015_CONFIG_DR
 
-    def _data_rate_default(self) -> int:
+    def _data_rate_default(self) -> Literal[1600]:
         return 1600
 
     def _conversion_value(self, raw_adc: int) -> int:

@@ -11,7 +11,13 @@ CircuitPython driver for 1115 ADCs.
 * Author(s): Carter Nelson
 """
 import struct
-from typing import Dict, List
+
+try:
+    from typing import Dict, List
+
+    from typing_extensions import Literal
+except ImportError:
+    pass
 
 # pylint: disable=unused-import
 from .ads1x15 import ADS1x15, Mode
@@ -43,7 +49,7 @@ class ADS1115(ADS1x15):
     """Class for the ADS1115 16 bit ADC."""
 
     @property
-    def bits(self) -> int:
+    def bits(self) -> Literal[16]:
         """The ADC bit resolution."""
         return 16
 

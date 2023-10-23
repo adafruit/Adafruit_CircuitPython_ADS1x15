@@ -25,7 +25,10 @@ try:
     from busio import I2C
     from microcontroller import Pin
 except ImportError:
-    pass
+    # define Pin to avoid the error:
+    #   def read(self, pin: Pin, is_differential: bool = False) -> int:
+    #   NameError: name 'Pin' is not defined
+    Pin = None
 
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)

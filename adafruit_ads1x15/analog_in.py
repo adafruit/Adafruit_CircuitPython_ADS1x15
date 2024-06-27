@@ -49,7 +49,12 @@ class AnalogIn:
 
     @property
     def value(self) -> int:
-        """Returns the value of an ADC pin as an integer."""
+        """The value on the analog pin between 0 and 65535
+        inclusive (16-bit). (read-only)
+
+        Even if the underlying analog to digital converter (ADC) is
+        lower resolution, the value is 16-bit.
+        """
         return self._ads.read(
             self._pin_setting, is_differential=self.is_differential
         ) << (16 - self._ads.bits)

@@ -25,9 +25,12 @@ chan = AnalogIn(ads, ADS.P0)
 # Create Interrupt-driven input to track comparator changes
 int_pin = countio.Counter(board.GP9, edge=countio.Edge.RISE)
 
+# Set comparator to assert after 1 ADC conversion
 ads.compqueue = 1
-ads.write_comparator_low_threshold(0x3E80)
-ads.write_comparator_high_threshold(0x3E90)
+# Set comparator low threshold to 2V
+ads.write_comparator_low_threshold(chan.ADC_value(2))
+# Set comparator high threshold to 2.002V. High threshold must be above low threshold
+ads.write_comparator_high_threshold(chan.ADC_value(2.002))
 
 count = 0
 while True:

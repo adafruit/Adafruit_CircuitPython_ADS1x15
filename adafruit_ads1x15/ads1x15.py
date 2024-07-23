@@ -252,7 +252,7 @@ class ADS1x15:
             i2c.write(self.buf)
 
     def write_comparator_low_threshold(self, value: int):
-        """Write 16 bit value to register."""
+        """Write 16 bit value to Comparator Low Threshold register."""
         self.buf[0] = _ADS1X15_POINTER_LO_THRES
         self.buf[1] = (value >> 8) & 0xFF
         self.buf[2] = value & 0xFF
@@ -260,7 +260,7 @@ class ADS1x15:
             i2c.write(self.buf)
 
     def write_comparator_high_threshold(self, value: int):
-        """Write 16 bit value to register."""
+        """Write 16 bit value to Comparator High Threshold register."""
         self.buf[0] = _ADS1X15_POINTER_HI_THRES
         self.buf[1] = (value >> 8) & 0xFF
         self.buf[2] = value & 0xFF

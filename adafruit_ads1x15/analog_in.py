@@ -66,5 +66,6 @@ class AnalogIn:
         return volts
 
     def ADC_value(self, volts: float) -> int:
+        """Calculates integer for threshold registers from voltage level input"""
         value = int((volts * 32767) / _ADS1X15_PGA_RANGE[self._ads.gain])
         return value

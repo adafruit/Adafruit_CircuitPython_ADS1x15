@@ -33,9 +33,17 @@ except ImportError:
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)
 _ADS1X15_POINTER_CONFIG = const(0x01)
+_ADS1X15_POINTER_LO_THRES = const(0x02)
+_ADS1X15_POINTER_HI_THRES = const(0x03)
+
 _ADS1X15_CONFIG_OS_SINGLE = const(0x8000)
 _ADS1X15_CONFIG_MUX_OFFSET = const(12)
-_ADS1X15_CONFIG_COMP_QUE_DISABLE = const(0x0003)
+_ADS1X15_CONFIG_COMP_QUEUE = {
+    0: 0x0003,
+    1: 0x0000,
+    2: 0x0001,
+    4: 0x0002,
+}
 _ADS1X15_CONFIG_GAIN = {
     2 / 3: 0x0000,
     1: 0x0200,
@@ -75,6 +83,7 @@ class ADS1x15:
         gain: float = 1,
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
+        compqueue: int = 0,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -83,6 +92,7 @@ class ADS1x15:
         self.gain = gain
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.mode = mode
+        self.compqueue = compqueue
         self.i2c_device = I2CDevice(i2c, address)
 
     @property
@@ -128,6 +138,25 @@ class ADS1x15:
     def gains(self) -> List[float]:
         """Possible gain settings."""
         g = list(_ADS1X15_CONFIG_GAIN.keys())
+        g.sort()
+        return g
+
+    @property
+    def compqueue(self) -> int:
+        """The ADC Comparator Queue."""
+        return self._compqueue
+
+    @compqueue.setter
+    def compqueue(self, compqueue: int) -> None:
+        possible_compqueues = self.compqueues
+        if compqueue not in possible_compqueues:
+            raise ValueError("Comparator Queue must be one of: {}".format(possible_compqueues))
+        self._compqueue = compqueue
+
+    @property
+    def compqueues(self) -> List[int]:
+        """Possible gain settings."""
+        g = list(_ADS1X15_CONFIG_COMP_QUEUE.keys())
         g.sort()
         return g
 
@@ -183,7 +212,7 @@ class ADS1x15:
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode
         config |= self.rate_config[self.data_rate]
-        config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
+        config |= _ADS1X15_CONFIG_COMP_QUEUE[self.compqueue]
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
         # Wait for conversion to complete
@@ -217,6 +246,22 @@ class ADS1x15:
     def _write_register(self, reg: int, value: int):
         """Write 16 bit value to register."""
         self.buf[0] = reg
+        self.buf[1] = (value >> 8) & 0xFF
+        self.buf[2] = value & 0xFF
+        with self.i2c_device as i2c:
+            i2c.write(self.buf)
+
+    def write_comparator_low_threshold(self, value: int):
+        """Write 16 bit value to register."""
+        self.buf[0] = _ADS1X15_POINTER_LO_THRES
+        self.buf[1] = (value >> 8) & 0xFF
+        self.buf[2] = value & 0xFF
+        with self.i2c_device as i2c:
+            i2c.write(self.buf)
+
+    def write_comparator_high_threshold(self, value: int):
+        """Write 16 bit value to register."""
+        self.buf[0] = _ADS1X15_POINTER_HI_THRES
         self.buf[1] = (value >> 8) & 0xFF
         self.buf[2] = value & 0xFF
         with self.i2c_device as i2c:

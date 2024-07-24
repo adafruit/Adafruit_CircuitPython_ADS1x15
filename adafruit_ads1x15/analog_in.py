@@ -62,10 +62,19 @@ class AnalogIn:
     @property
     def voltage(self) -> float:
         """Returns the voltage from the ADC pin as a floating point value."""
-        volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
+        volts = self.convert_to_voltage(self.value)
         return volts
 
-    def ADC_value(self, volts: float) -> int:
+    def convert_to_value(self, volts: float) -> int:
         """Calculates integer for threshold registers from voltage level input"""
-        value = int((volts * 32767) / _ADS1X15_PGA_RANGE[self._ads.gain])
+        value = round((volts * 32767) / _ADS1X15_PGA_RANGE[self._ads.gain])
+        if value < 0:
+            value = 65536 + value
         return value
+
+    def convert_to_voltage(self, value: int) -> float:
+        """Calculates integer for threshold registers from voltage level input"""
+        volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
+        if volts > _ADS1X15_PGA_RANGE[self._ads.gain]:
+            volts = _ADS1X15_PGA_RANGE[self._ads.gain] - volts
+        return volts

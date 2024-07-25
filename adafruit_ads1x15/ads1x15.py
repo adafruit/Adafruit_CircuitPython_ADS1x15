@@ -71,12 +71,20 @@ class ADS1x15:
 
     :param ~busio.I2C i2c: The I2C bus the device is connected to.
     :param float gain: The ADC gain.
+Search logs
+
     :param int data_rate: The data rate for ADC conversion in samples per second.
                           Default value depends on the device.
     :param Mode mode: The conversion mode, defaults to `Mode.SINGLE`.
-    :param int comparator_queue_length: The number of successive conversions exceeding the comparator threshold before asserting ALERT/RDY pin, defaults to 0 (comparator function disabled).
-    :param int comparator_low_thres: Voltage limit under which comparator de-asserts ALERT/RDY pin. Must be lower than high threshold to use comparator function. Defaults to 0x800.
-    :param int comparator_high_thres: Voltage limit over which comparator asserts ALERT/RDY pin. Must be higher than low threshold to use comparator function. Defaults to 0x7FF.
+    :param int comparator_queue_length: The number of successive conversions exceeding
+                          the comparator threshold before asserting ALERT/RDY pin.
+                          Defaults to 0 (comparator function disabled).
+    :param int comparator_low_threshold: Voltage limit under which comparator de-asserts
+                          ALERT/RDY pin. Must be lower than high threshold to use comparator
+                          function. Defaults to 0x8000.
+    :param int comparator_high_threshold: Voltage limit over which comparator asserts
+                          ALERT/RDY pin. Must be higher than low threshold to use comparator
+                          function. Defaults to 0x7FF0.
     :param int address: The I2C address of the device.
     """
 
@@ -87,8 +95,8 @@ class ADS1x15:
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
         comparator_queue_length: int = 0,
-        comparator_low_thres: int = 0x8000,
-        comparator_high_thres: int = 0x7FF0,
+        comparator_low_threshold: int = 0x8000,
+        comparator_high_threshold: int = 0x7FF0,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -98,8 +106,8 @@ class ADS1x15:
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.mode = mode
         self.comparator_queue_length = comparator_queue_length
-        self.comparator_low_thres: comparator_low_thres
-        self.comparator_high_thres: comparator_high_thres
+        self.comparator_low_threshold: comparator_low_threshold
+        self.comparator_high_threshold: comparator_high_threshold
         self.i2c_device = I2CDevice(i2c, address)
 
     @property
@@ -150,7 +158,7 @@ class ADS1x15:
 
     @property
     def comparator_queue_length(self) -> int:
-        """The ADC Comparator Queue."""
+        """The ADC comparator queue length."""
         return self._comparator_queue_length
 
     @comparator_queue_length.setter
@@ -168,28 +176,42 @@ class ADS1x15:
         return g
 
     @property
-    def comparator_low_thres(self) -> int:
+    def comparator_low_threshold(self) -> int:
         """The ADC Comparator Lower Limit Threshold."""
-        return self._comparator_low_thres
+        return self._comparator_low_threshold
 
-    @comparator_low_thres.setter
-    def comparator_low_thres(self, comparator_low_thres: int) -> None:
+    @comparator_low_threshold.setter
+    def comparator_low_threshold(self, comparator_low_threshold: int) -> None:
         """Sets 12-bit threshold in 16-bit register in unsigned format."""
-        if comparator_low_thres < 0 or comparator_low_thres > 65535:
+        if comparator_low_threshold < 0 or comparator_low_threshold > 65535:
             raise ValueError("Comparator Low Threshold must be unsigned 16-bit integer between 0 and 65535")
-        self._comparator_low_thres = comparator_low_thres
+        self._comparator_low_threshold = comparator_low_threshold
+
+        """Write value to chip"""
+        self.buf[0] = _ADS1X15_POINTER_LO_THRES
+        self.buf[1] = (self._comparator_low_threshold >> 8) & 0xFF
+        self.buf[2] = self._comparator_low_threshold & 0xFF
+        with self.i2c_device as i2c:
+            i2c.write(self.buf)
 
     @property
-    def comparator_high_thres(self) -> int:
+    def comparator_high_threshold(self) -> int:
         """The ADC Comparator Higher Limit Threshold."""
-        return self._comparator_high_thres
+        return self._comparator_high_threshold
 
-    @comparator_high_thres.setter
-    def comparator_high_thres(self, comparator_high_thres: int) -> None:
+    @comparator_high_threshold.setter
+    def comparator_high_threshold(self, comparator_high_threshold: int) -> None:
         """Sets 12-bit threshold in 16-bit register in unsigned format."""
-        if comparator_high_thres < 0 or comparator_high_thres > 65535:
+        if comparator_high_threshold < 0 or comparator_high_threshold > 65535:
             raise ValueError("Comparator High Threshold must be unsigned 16-bit integer between 0 and 65535")
-        self._comparator_high_thres = comparator_high_thres
+        self._comparator_high_threshold = comparator_high_threshold
+
+        """Write value to chip"""
+        self.buf[0] = _ADS1X15_POINTER_HI_THRES
+        self.buf[1] = (self._comparator_high_threshold >> 8) & 0xFF
+        self.buf[2] = self._comparator_high_threshold & 0xFF
+        with self.i2c_device as i2c:
+            i2c.write(self.buf)
 
     @property
     def mode(self) -> int:
@@ -279,20 +301,6 @@ class ADS1x15:
         self.buf[0] = reg
         self.buf[1] = (value >> 8) & 0xFF
         self.buf[2] = value & 0xFF
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
-
-    def write_comparator_thresholds(self):
-        """Write 16 bit values to Comparator Low and High Threshold registers."""
-        self.buf[0] = _ADS1X15_POINTER_LO_THRES
-        self.buf[1] = (self._comparator_low_thres >> 8) & 0xFF
-        self.buf[2] = self._comparator_low_thres & 0xFF
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
-
-        self.buf[0] = _ADS1X15_POINTER_HI_THRES
-        self.buf[1] = (self._comparator_high_thres >> 8) & 0xFF
-        self.buf[2] = self._comparator_high_thres & 0xFF
         with self.i2c_device as i2c:
             i2c.write(self.buf)
 

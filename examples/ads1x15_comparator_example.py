@@ -29,11 +29,9 @@ int_pin = countio.Counter(board.GP9, edge=countio.Edge.RISE)
 ads.comparator_queue_length = 1
 
 # Set comparator low threshold to 2V
-ads.comparator_low_thres = chan.convert_to_value(2.000)
+ads.comparator_low_threshold = chan.convert_to_value(2.000)
 # Set comparator high threshold to 2.002V. High threshold must be above low threshold
-ads.comparator_high_thres = chan.convert_to_value(2.002)
-# Write comparator values to the chip registers
-ads.write_comparator_thresholds()
+ads.comparator_high_threshold = chan.convert_to_value(2.002)
 
 count = 0
 while True:

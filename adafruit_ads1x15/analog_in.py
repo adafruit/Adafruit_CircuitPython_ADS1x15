@@ -74,7 +74,7 @@ class AnalogIn:
 
     def convert_to_voltage(self, value: int) -> float:
         """Calculates integer for threshold registers from voltage level input"""
-        volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
+        volts = value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
         if volts > _ADS1X15_PGA_RANGE[self._ads.gain]:
             volts = _ADS1X15_PGA_RANGE[self._ads.gain] - volts
         return volts

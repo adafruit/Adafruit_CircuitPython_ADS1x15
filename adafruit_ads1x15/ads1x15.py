@@ -71,8 +71,6 @@ class ADS1x15:
 
     :param ~busio.I2C i2c: The I2C bus the device is connected to.
     :param float gain: The ADC gain.
-Search logs
-
     :param int data_rate: The data rate for ADC conversion in samples per second.
                           Default value depends on the device.
     :param Mode mode: The conversion mode, defaults to `Mode.SINGLE`.
@@ -81,10 +79,12 @@ Search logs
                           Defaults to 0 (comparator function disabled).
     :param int comparator_low_threshold: Voltage limit under which comparator de-asserts
                           ALERT/RDY pin. Must be lower than high threshold to use comparator
-                          function. Defaults to 0x8000.
+                          function. Value is 12-bit, 2's complement stored in
+                          16-bit register where 4 LSBs are 0. Defaults to 0x8000 (decimal -32768).
     :param int comparator_high_threshold: Voltage limit over which comparator asserts
                           ALERT/RDY pin. Must be higher than low threshold to use comparator
-                          function. Defaults to 0x7FF0.
+                          function. Value is 12-bit, 2's complement stored in
+                          16-bit register where 4 LSBs are 0. Defaults to 0x7FF0 (decimal 32752).
     :param int address: The I2C address of the device.
     """
 

@@ -96,8 +96,8 @@ class ADS1x15:
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
         comparator_queue_length: int = 0,
-        comparator_low_threshold: int = 0x8000,
-        comparator_high_threshold: int = 0x7FF0,
+        comparator_low_threshold: int = -2048,
+        comparator_high_threshold: int = 2047,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -187,17 +187,24 @@ class ADS1x15:
 
     @comparator_low_threshold.setter
     def comparator_low_threshold(self, comparator_low_threshold: int) -> None:
-        """Sets 12-bit threshold in 16-bit register in unsigned format."""
-        if comparator_low_threshold < 0 or comparator_low_threshold > 65535:
+        """Sets Comparator low threshold value"""
+        if comparator_low_threshold < -2048 or comparator_low_threshold > 2047:
             raise ValueError(
-                "Comparator Low Threshold must be unsigned 16-bit integer between 0 and 65535"
+                "Comparator Low Threshold must be an integer between -2048 and 2047"
             )
         self._comparator_low_threshold = comparator_low_threshold
 
+        """Convert integer value to 12-bit twos complement and bit shift"""
+        if comparator_low_threshold < 0:
+            tempval = 4096 + comparator_low_threshold
+        else:
+            tempval = comparator_low_threshold
+        tempval <<= 4
+
         """Write value to chip"""
         self.buf[0] = _ADS1X15_POINTER_LO_THRES
-        self.buf[1] = (self._comparator_low_threshold >> 8) & 0xFF
-        self.buf[2] = self._comparator_low_threshold & 0xFF
+        self.buf[1] = (tempval >> 8) & 0xFF
+        self.buf[2] = tempval & 0xFF
         with self.i2c_device as i2c:
             i2c.write(self.buf)
 
@@ -208,17 +215,24 @@ class ADS1x15:
 
     @comparator_high_threshold.setter
     def comparator_high_threshold(self, comparator_high_threshold: int) -> None:
-        """Sets 12-bit threshold in 16-bit register in unsigned format."""
-        if comparator_high_threshold < 0 or comparator_high_threshold > 65535:
+        """Sets Comparator high threshold value"""
+        if comparator_high_threshold < -2048 or comparator_high_threshold > 2047:
             raise ValueError(
-                "Comparator High Threshold must be unsigned 16-bit integer between 0 and 65535"
+                "Comparator High Threshold must be an integer between -2048 and 2047"
             )
         self._comparator_high_threshold = comparator_high_threshold
 
+        """Convert integer value to 12-bit twos complement and bit shift"""
+        if comparator_high_threshold < 0:
+            tempval = 4096 + comparator_high_threshold
+        else:
+            tempval = comparator_high_threshold
+        tempval <<= 4
+
         """Write value to chip"""
         self.buf[0] = _ADS1X15_POINTER_HI_THRES
-        self.buf[1] = (self._comparator_high_threshold >> 8) & 0xFF
-        self.buf[2] = self._comparator_high_threshold & 0xFF
+        self.buf[1] = (tempval >> 8) & 0xFF
+        self.buf[2] = tempval & 0xFF
         with self.i2c_device as i2c:
             i2c.write(self.buf)
 

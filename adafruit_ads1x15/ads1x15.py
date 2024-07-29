@@ -100,6 +100,7 @@ class ADS1x15:
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-instance-attributes
         self._last_pin_read = None
         self.buf = bytearray(3)
         self.gain = gain
@@ -163,9 +164,9 @@ class ADS1x15:
 
     @comparator_queue_length.setter
     def comparator_queue_length(self, comparator_queue_length: int) -> None:
-        possible_comparator_queue_lengths = self.comparator_queue_lengths
-        if comparator_queue_length not in possible_comparator_queue_lengths:
-            raise ValueError("Comparator Queue must be one of: {}".format(possible_comparator_queue_lengths))
+        possible_comp_queue_lengths = self.comparator_queue_lengths
+        if comparator_queue_length not in possible_comp_queue_lengths:
+            raise ValueError("Comparator Queue must be one of: {}".format(possible_comp_queue_lengths))
         self._comparator_queue_length = comparator_queue_length
 
     @property

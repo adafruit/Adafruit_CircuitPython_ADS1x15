@@ -7,6 +7,7 @@ import busio
 import countio
 
 import adafruit_ads1x15.ads1015 as ADS
+
 # import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
@@ -35,7 +36,7 @@ ads.comparator_high_threshold = chan.convert_to_value(2.002)
 
 count = 0
 while True:
-    print(chan.value, chan.voltage) #This initiates new ADC reading
+    print(chan.value, chan.voltage)  # This initiates new ADC reading
     if int_pin.count > count:
         print("Comparator Triggered")
         count = int_pin.count

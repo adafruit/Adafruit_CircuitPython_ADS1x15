@@ -88,6 +88,7 @@ class ADS1x15:
     :param int address: The I2C address of the device.
     """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         i2c: I2C,
@@ -100,7 +101,6 @@ class ADS1x15:
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
-        # pylint: disable=too-many-instance-attributes
         self._last_pin_read = None
         self.buf = bytearray(3)
         self.gain = gain
@@ -166,7 +166,11 @@ class ADS1x15:
     def comparator_queue_length(self, comparator_queue_length: int) -> None:
         possible_comp_queue_lengths = self.comparator_queue_lengths
         if comparator_queue_length not in possible_comp_queue_lengths:
-            raise ValueError("Comparator Queue must be one of: {}".format(possible_comp_queue_lengths))
+            raise ValueError(
+                "Comparator Queue must be one of: {}".format(
+                    possible_comp_queue_lengths
+                )
+            )
         self._comparator_queue_length = comparator_queue_length
 
     @property
@@ -185,7 +189,9 @@ class ADS1x15:
     def comparator_low_threshold(self, comparator_low_threshold: int) -> None:
         """Sets 12-bit threshold in 16-bit register in unsigned format."""
         if comparator_low_threshold < 0 or comparator_low_threshold > 65535:
-            raise ValueError("Comparator Low Threshold must be unsigned 16-bit integer between 0 and 65535")
+            raise ValueError(
+                "Comparator Low Threshold must be unsigned 16-bit integer between 0 and 65535"
+            )
         self._comparator_low_threshold = comparator_low_threshold
 
         """Write value to chip"""
@@ -204,7 +210,9 @@ class ADS1x15:
     def comparator_high_threshold(self, comparator_high_threshold: int) -> None:
         """Sets 12-bit threshold in 16-bit register in unsigned format."""
         if comparator_high_threshold < 0 or comparator_high_threshold > 65535:
-            raise ValueError("Comparator High Threshold must be unsigned 16-bit integer between 0 and 65535")
+            raise ValueError(
+                "Comparator High Threshold must be unsigned 16-bit integer between 0 and 65535"
+            )
         self._comparator_high_threshold = comparator_high_threshold
 
         """Write value to chip"""

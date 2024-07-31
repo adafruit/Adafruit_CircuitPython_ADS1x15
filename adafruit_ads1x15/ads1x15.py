@@ -96,8 +96,8 @@ class ADS1x15:
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
         comparator_queue_length: int = 0,
-        comparator_low_threshold: int = -2048,
-        comparator_high_threshold: int = 2047,
+        comparator_low_threshold: Optional[int] = None,
+        comparator_high_threshold: Optional[int] = None,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -107,9 +107,17 @@ class ADS1x15:
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.mode = mode
         self.comparator_queue_length = comparator_queue_length
-        self.comparator_low_threshold: comparator_low_threshold
-        self.comparator_high_threshold: comparator_high_threshold
         self.i2c_device = I2CDevice(i2c, address)
+        self.comparator_low_threshold = (
+            self._comp_low_thres_default()
+            if comparator_low_threshold is None
+            else comparator_low_threshold
+        )
+        self.comparator_high_threshold = (
+            self._comp_high_thres_default()
+            if comparator_high_threshold is None
+            else comparator_high_threshold
+        )
 
     @property
     def bits(self) -> int:
@@ -185,56 +193,32 @@ class ADS1x15:
         """The ADC Comparator Lower Limit Threshold."""
         return self._comparator_low_threshold
 
-    @comparator_low_threshold.setter
-    def comparator_low_threshold(self, comparator_low_threshold: int) -> None:
-        """Sets Comparator low threshold value"""
-        if comparator_low_threshold < -2048 or comparator_low_threshold > 2047:
-            raise ValueError(
-                "Comparator Low Threshold must be an integer between -2048 and 2047"
-            )
-        self._comparator_low_threshold = comparator_low_threshold
-
-        """Convert integer value to 12-bit twos complement and bit shift"""
-        if comparator_low_threshold < 0:
-            tempval = 4096 + comparator_low_threshold
-        else:
-            tempval = comparator_low_threshold
-        tempval <<= 4
-
-        """Write value to chip"""
-        self.buf[0] = _ADS1X15_POINTER_LO_THRES
-        self.buf[1] = (tempval >> 8) & 0xFF
-        self.buf[2] = tempval & 0xFF
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
-
     @property
     def comparator_high_threshold(self) -> int:
         """The ADC Comparator Higher Limit Threshold."""
         return self._comparator_high_threshold
 
+    @comparator_low_threshold.setter
+    def comparator_low_threshold(self, value: int) -> None:
+        """Set comparator low threshold value for ADS1015 ADC
+
+        :param int value: 16-bit signed integer to write to register
+        """
+        if value < 0 or value > 65535:
+            raise ValueError("Comparator Threshold value must be between 0 and 65535")
+        self._comparator_low_threshold = value
+        self._write_register(_ADS1X15_POINTER_LO_THRES, self.comparator_low_threshold)
+
     @comparator_high_threshold.setter
-    def comparator_high_threshold(self, comparator_high_threshold: int) -> None:
-        """Sets Comparator high threshold value"""
-        if comparator_high_threshold < -2048 or comparator_high_threshold > 2047:
-            raise ValueError(
-                "Comparator High Threshold must be an integer between -2048 and 2047"
-            )
-        self._comparator_high_threshold = comparator_high_threshold
+    def comparator_high_threshold(self, value: int) -> None:
+        """Set comparator high threshold value for ADS1015 ADC
 
-        """Convert integer value to 12-bit twos complement and bit shift"""
-        if comparator_high_threshold < 0:
-            tempval = 4096 + comparator_high_threshold
-        else:
-            tempval = comparator_high_threshold
-        tempval <<= 4
-
-        """Write value to chip"""
-        self.buf[0] = _ADS1X15_POINTER_HI_THRES
-        self.buf[1] = (tempval >> 8) & 0xFF
-        self.buf[2] = tempval & 0xFF
-        with self.i2c_device as i2c:
-            i2c.write(self.buf)
+        :param int value: 16-bit signed integer to write to register
+        """
+        if value < 0 or value > 65535:
+            raise ValueError("Comparator Threshold value must be between 0 and 65535")
+        self._comparator_high_threshold = value
+        self._write_register(_ADS1X15_POINTER_HI_THRES, self.comparator_high_threshold)
 
     @property
     def mode(self) -> int:
@@ -261,6 +245,18 @@ class ADS1x15:
         Should be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement _data_rate_default!")
+
+    def _comp_low_thres_default(self) -> int:
+        """Retrieve the default comparator low threshold for this ADC (in 16-bit signed int).
+        Should be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement _comp_low_thres_default!")
+
+    def _comp_high_thres_default(self) -> int:
+        """Retrieve the default comparator high threshold for this ADC (in 16-bit signed int).
+        Should be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement _comp_high_thres_default!")
 
     def _conversion_value(self, raw_adc: int) -> int:
         """Subclasses should override this function that takes the 16 raw ADC

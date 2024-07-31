@@ -67,6 +67,12 @@ class ADS1015(ADS1x15):
     def _data_rate_default(self) -> Literal[1600]:
         return 1600
 
+    def _comp_low_thres_default(self) -> Literal[0x8000]:
+        return 0x8000
+
+    def _comp_high_thres_default(self) -> Literal[0x7FF0]:
+        return 0x7FF0
+
     def _conversion_value(self, raw_adc: int) -> int:
         value = struct.unpack(">h", raw_adc.to_bytes(2, "big"))[0]
-        return value >> 4
+        return value

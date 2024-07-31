@@ -55,9 +55,7 @@ class AnalogIn:
         Even if the underlying analog to digital converter (ADC) is
         lower resolution, the value is 16-bit.
         """
-        return self._ads.read(
-            self._pin_setting, is_differential=self.is_differential
-        ) << (16 - self._ads.bits)
+        return self._ads.read(self._pin_setting, is_differential=self.is_differential)
 
     @property
     def voltage(self) -> float:
@@ -67,12 +65,39 @@ class AnalogIn:
 
     def convert_to_value(self, volts: float) -> int:
         """Calculates 12-bit integer for threshold registers from voltage level input"""
-        value = round(volts * 2047 / _ADS1X15_PGA_RANGE[self._ads.gain])
+
+        # Convert 2's complement of signed int if number is negative
+        if volts > 0:
+            value = round(
+                (volts / _ADS1X15_PGA_RANGE[self._ads.gain])
+                * ((1 << (self._ads.bits - 1)) - 1)
+            )
+        else:
+            value = round(
+                (volts / _ADS1X15_PGA_RANGE[self._ads.gain])
+                * (1 << (self._ads.bits - 1))
+            )
+            value += 1 << self._ads.bits
+
+        # Need to bit shift if value is only 12-bits
+        value <<= 16 - self._ads.bits
         return value
 
-    def convert_to_voltage(self, value: int) -> float:
+    def convert_to_voltage(self, value_int: int) -> float:
         """Calculates voltage from 16-bit ADC reading"""
-        volts = value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
-        if volts > _ADS1X15_PGA_RANGE[self._ads.gain]:
-            volts = _ADS1X15_PGA_RANGE[self._ads.gain] - volts
+
+        if value_int & 0x8000:
+            # Need to convert negative number through 2's complement
+            value_int -= 0x10000
+
+        # Need to bit shift if value is only 12-bits
+        value_int >>= 16 - self._ads.bits
+
+        volts = float(value_int)
+        volts = (
+            volts
+            * _ADS1X15_PGA_RANGE[self._ads.gain]
+            / (0x7FFF >> (16 - self._ads.bits))
+        )
+
         return volts

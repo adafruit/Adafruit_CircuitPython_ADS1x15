@@ -79,12 +79,10 @@ class ADS1x15:
                           Defaults to 0 (comparator function disabled).
     :param int comparator_low_threshold: Voltage limit under which comparator de-asserts
                           ALERT/RDY pin. Must be lower than high threshold to use comparator
-                          function. Value is 12-bit, 2's complement stored in
-                          16-bit register where 4 LSBs are 0. Defaults to 0x8000 (decimal -32768).
+                          function. See subclass for value range and default.
     :param int comparator_high_threshold: Voltage limit over which comparator asserts
                           ALERT/RDY pin. Must be higher than low threshold to use comparator
-                          function. Value is 12-bit, 2's complement stored in
-                          16-bit register where 4 LSBs are 0. Defaults to 0x7FF0 (decimal 32752).
+                          function. See subclass for value range and default.
     :param int address: The I2C address of the device.
     """
 

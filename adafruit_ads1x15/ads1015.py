@@ -65,12 +65,17 @@ class ADS1015(ADS1x15):
         return _ADS1015_CONFIG_DR
 
     def _data_rate_default(self) -> Literal[1600]:
+        """Default data rate setting is 1600 samples per second"""
         return 1600
 
     def _comp_low_thres_default(self) -> Literal[0x8000]:
+        """Value is 12-bit, 2's complement stored in 16-bit register where 4 LSBs are 0.
+        Defaults to 0x8000 as 16-bit hex (-2048 as 12-bit decimal)."""
         return 0x8000
 
     def _comp_high_thres_default(self) -> Literal[0x7FF0]:
+        """Value is 12-bit, 2's complement stored in 16-bit register where 4 LSBs are 0.
+        Defaults to 0x7FF0 as 16-bit hex (2047 as 12-bit decimal)."""
         return 0x7FF0
 
     def _conversion_value(self, raw_adc: int) -> int:

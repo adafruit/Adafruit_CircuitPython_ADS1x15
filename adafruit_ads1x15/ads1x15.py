@@ -94,8 +94,8 @@ class ADS1x15:
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
         comparator_queue_length: int = 0,
-        comparator_low_threshold: Optional[int] = None,
-        comparator_high_threshold: Optional[int] = None,
+        comparator_low_threshold: int = -32768,
+        comparator_high_threshold: int = 32767,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -106,16 +106,8 @@ class ADS1x15:
         self.mode = mode
         self.comparator_queue_length = comparator_queue_length
         self.i2c_device = I2CDevice(i2c, address)
-        self.comparator_low_threshold = (
-            self._comp_low_thres_default()
-            if comparator_low_threshold is None
-            else comparator_low_threshold
-        )
-        self.comparator_high_threshold = (
-            self._comp_high_thres_default()
-            if comparator_high_threshold is None
-            else comparator_high_threshold
-        )
+        self.comparator_low_threshold = comparator_low_threshold
+        self.comparator_high_threshold = comparator_high_threshold
 
     @property
     def bits(self) -> int:
@@ -198,23 +190,35 @@ class ADS1x15:
 
     @comparator_low_threshold.setter
     def comparator_low_threshold(self, value: int) -> None:
-        """Set comparator low threshold value for ADS1015 ADC
+        """Set comparator low threshold value for ADS1x15 ADC
 
         :param int value: 16-bit signed integer to write to register
         """
-        if value < 0 or value > 65535:
-            raise ValueError("Comparator Threshold value must be between 0 and 65535")
+        if value < -32768 or value > 32767:
+            raise ValueError(
+                "Comparator Threshold value must be between -32768 and 32767"
+            )
+
+        if (self.bits == 12) & (value & 0x000F > 0):
+            print("4 LSBs will be truncated for ADS1015 for 12-bit value")
+
         self._comparator_low_threshold = value
         self._write_register(_ADS1X15_POINTER_LO_THRES, self.comparator_low_threshold)
 
     @comparator_high_threshold.setter
     def comparator_high_threshold(self, value: int) -> None:
-        """Set comparator high threshold value for ADS1015 ADC
+        """Set comparator high threshold value for ADS1x15 ADC
 
         :param int value: 16-bit signed integer to write to register
         """
-        if value < 0 or value > 65535:
-            raise ValueError("Comparator Threshold value must be between 0 and 65535")
+        if value < -32768 or value > 32767:
+            raise ValueError(
+                "Comparator Threshold value must be between -32768 and 32767"
+            )
+
+        if (self.bits == 12) & (value & 0x000F > 0):
+            print("4 LSBs will be truncated for ADS1015 for 12-bit value")
+
         self._comparator_high_threshold = value
         self._write_register(_ADS1X15_POINTER_HI_THRES, self.comparator_high_threshold)
 
@@ -243,18 +247,6 @@ class ADS1x15:
         Should be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement _data_rate_default!")
-
-    def _comp_low_thres_default(self) -> int:
-        """Retrieve the default comparator low threshold for this ADC (in 16-bit signed int).
-        Should be implemented by subclasses.
-        """
-        raise NotImplementedError("Subclasses must implement _comp_low_thres_default!")
-
-    def _comp_high_thres_default(self) -> int:
-        """Retrieve the default comparator high threshold for this ADC (in 16-bit signed int).
-        Should be implemented by subclasses.
-        """
-        raise NotImplementedError("Subclasses must implement _comp_high_thres_default!")
 
     def _conversion_value(self, raw_adc: int) -> int:
         """Subclasses should override this function that takes the 16 raw ADC

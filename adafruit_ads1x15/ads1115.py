@@ -69,16 +69,6 @@ class ADS1115(ADS1x15):
         """Default data rate setting is 128 samples per second"""
         return 128
 
-    def _comp_low_thres_default(self) -> Literal[0x8000]:
-        """Value is 16-bit, 2's complement.
-        Defaults to 0x8000 as 16-bit hex (-32768 16-bit decimal)."""
-        return 0x8000
-
-    def _comp_high_thres_default(self) -> Literal[0x7FFF]:
-        """Value is 16-bit, 2's complement.
-        Defaults to 0x7FFF as 16-bit hex (32767 16-bit decimal)."""
-        return 0x7FFF
-
     def _conversion_value(self, raw_adc: int) -> int:
         value = struct.unpack(">h", raw_adc.to_bytes(2, "big"))[0]
         return value

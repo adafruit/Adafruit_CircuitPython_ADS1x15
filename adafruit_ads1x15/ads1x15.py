@@ -66,6 +66,42 @@ class Mode:
     """Single-Shot Mode"""
 
 
+class Comp_Mode:
+    """An enum-like class representing possible ADC Comparator operating modes."""
+
+    # See datasheet "Operating Modes" section
+    # values here are masks for setting COMP_MODE bit in Config Register
+    # pylint: disable=too-few-public-methods
+    TRADITIONAL = 0x0000
+    """Traditional Compartor Mode activates above high threshold, de-activates below low"""
+    WINDOW = 0x0010
+    """Window Comparator Mode activates when reading is outside of high and low thresholds"""
+
+
+class Comp_Polarity:
+    """An enum-like class representing possible ADC Comparator polarity modes."""
+
+    # See datasheet "Operating Modes" section
+    # values here are masks for setting COMP_POL bit in Config Register
+    # pylint: disable=too-few-public-methods
+    ACTIVE_LOW = 0x0000
+    """ALERT_RDY pin is LOW when comparator is active"""
+    ACTIVE_HIGH = 0x0008
+    """ALERT_RDY pin is HIGH when comparator is active"""
+
+
+class Comp_Latch:
+    """An enum-like class representing possible ADC Comparator latching modes."""
+
+    # See datasheet "Operating Modes" section
+    # values here are masks for setting COMP_LAT bit in Config Register
+    # pylint: disable=too-few-public-methods
+    NONLATCHING = 0x0000
+    """ALERT_RDY pin does not latch when asserted"""
+    LATCHING = 0x0004
+    """ALERT_RDY pin remains asserted until data is read by controller"""
+
+
 class ADS1x15:
     """Base functionality for ADS1x15 analog to digital converters.
 
@@ -79,10 +115,17 @@ class ADS1x15:
                           Defaults to 0 (comparator function disabled).
     :param int comparator_low_threshold: Voltage limit under which comparator de-asserts
                           ALERT/RDY pin. Must be lower than high threshold to use comparator
-                          function. See subclass for value range and default.
+                          function. Range of -32768 to 32767, default -32768
     :param int comparator_high_threshold: Voltage limit over which comparator asserts
                           ALERT/RDY pin. Must be higher than low threshold to use comparator
-                          function. See subclass for value range and default.
+                          function. Range of -32768 to 32767, default 32767
+    :param Comp_Mode comparator_mode: Configures the comparator as either traditional or window.
+                          Defaults to 'Comp_Mode.TRADITIONAL'
+    :param Comp_Polarity comparator_polarity: Configures the comparator output as either active
+                          low or active high. Defaults to 'Comp_Polarity.ACTIVE_LOW'
+    :param Comp_Latch comparator_latch: Configures the comparator output to only stay asserted while
+                          readings exceed threshold or latch on assertion until data is read.
+                          Defaults to 'Comp_Latch.NONLATCHING'
     :param int address: The I2C address of the device.
     """
 
@@ -96,6 +139,9 @@ class ADS1x15:
         comparator_queue_length: int = 0,
         comparator_low_threshold: int = -32768,
         comparator_high_threshold: int = 32767,
+        comparator_mode: int = Comp_Mode.TRADITIONAL,
+        comparator_polarity: int = Comp_Polarity.ACTIVE_LOW,
+        comparator_latch: int = Comp_Latch.NONLATCHING,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -108,6 +154,9 @@ class ADS1x15:
         self.i2c_device = I2CDevice(i2c, address)
         self.comparator_low_threshold = comparator_low_threshold
         self.comparator_high_threshold = comparator_high_threshold
+        self.comparator_mode = comparator_mode
+        self.comparator_polarity = comparator_polarity
+        self.comparator_latch = comparator_latch
 
     @property
     def bits(self) -> int:
@@ -227,6 +276,39 @@ class ADS1x15:
             raise ValueError("Unsupported mode.")
         self._mode = mode
 
+    @property
+    def comparator_mode(self) -> int:
+        """The ADC comparator mode."""
+        return self._comparator_mode
+
+    @comparator_mode.setter
+    def comparator_mode(self, comp_mode: int) -> None:
+        if comp_mode not in (Comp_Mode.TRADITIONAL, Comp_Mode.WINDOW):
+            raise ValueError("Unsupported mode.")
+        self._comparator_mode = comp_mode
+
+    @property
+    def comparator_polarity(self) -> int:
+        """The ADC comparator polarity mode."""
+        return self._comparator_polarity
+
+    @comparator_polarity.setter
+    def comparator_polarity(self, comp_pol: int) -> None:
+        if comp_pol not in (Comp_Polarity.ACTIVE_LOW, Comp_Polarity.ACTIVE_HIGH):
+            raise ValueError("Unsupported mode.")
+        self._comparator_polarity = comp_pol
+
+    @property
+    def comparator_latch(self) -> int:
+        """The ADC comparator latching mode."""
+        return self._comparator_latch
+
+    @comparator_latch.setter
+    def comparator_latch(self, comp_latch: int) -> None:
+        if comp_latch not in (Comp_Latch.NONLATCHING, Comp_Latch.LATCHING):
+            raise ValueError("Unsupported mode.")
+        self._comparator_latch = comp_latch
+
     def read(self, pin: Pin, is_differential: bool = False) -> int:
         """I2C Interface for ADS1x15-based ADCs reads.
 
@@ -268,6 +350,9 @@ class ADS1x15:
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode
         config |= self.rate_config[self.data_rate]
+        config |= self.comparator_mode
+        config |= self.comparator_polarity
+        config |= self.comparator_latch
         config |= _ADS1X15_CONFIG_COMP_QUEUE[self.comparator_queue_length]
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
@@ -317,3 +402,35 @@ class ADS1x15:
             else:
                 i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2)
         return self.buf[0] << 8 | self.buf[1]
+
+    def read_config(self) -> None:
+        """Reads Config Register and sets all properties accordingly"""
+        config_value = self._read_register(_ADS1X15_POINTER_CONFIG)
+
+        self.gain = next(
+            key
+            for key, value in _ADS1X15_CONFIG_GAIN.items()
+            if value == (config_value & 0x0E00)
+        )
+        self.data_rate = next(
+            key
+            for key, value in self.rate_config.items()
+            if value == (config_value & 0x00E0)
+        )
+        self.comparator_queue_length = next(
+            key
+            for key, value in _ADS1X15_CONFIG_COMP_QUEUE.items()
+            if value == (config_value & 0x0003)
+        )
+        self.mode = Mode.SINGLE if config_value & 0x0100 else Mode.CONTINUOUS
+        self.comparator_mode = (
+            Comp_Mode.WINDOW if config_value & 0x0010 else Comp_Mode.TRADITIONAL
+        )
+        self.comparator_polarity = (
+            Comp_Polarity.ACTIVE_HIGH
+            if config_value & 0x0008
+            else Comp_Polarity.ACTIVE_LOW
+        )
+        self.comparator_latch = (
+            Comp_Latch.LATCHING if config_value & 0x0004 else Comp_Latch.NONLATCHING
+        )

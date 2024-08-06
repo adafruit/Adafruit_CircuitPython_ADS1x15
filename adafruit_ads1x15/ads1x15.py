@@ -199,9 +199,6 @@ class ADS1x15:
                 "Comparator Threshold value must be between -32768 and 32767"
             )
 
-        if (self.bits == 12) & (value & 0x000F > 0):
-            print("4 LSBs will be truncated for ADS1015 for 12-bit value")
-
         self._comparator_low_threshold = value
         self._write_register(_ADS1X15_POINTER_LO_THRES, self.comparator_low_threshold)
 
@@ -215,9 +212,6 @@ class ADS1x15:
             raise ValueError(
                 "Comparator Threshold value must be between -32768 and 32767"
             )
-
-        if (self.bits == 12) & (value & 0x000F > 0):
-            print("4 LSBs will be truncated for ADS1015 for 12-bit value")
 
         self._comparator_high_threshold = value
         self._write_register(_ADS1X15_POINTER_HI_THRES, self.comparator_high_threshold)

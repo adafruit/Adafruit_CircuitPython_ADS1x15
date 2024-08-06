@@ -66,6 +66,7 @@ class ADS1115(ADS1x15):
         return _ADS1115_CONFIG_DR
 
     def _data_rate_default(self) -> Literal[128]:
+        """Default data rate setting is 128 samples per second"""
         return 128
 
     def _conversion_value(self, raw_adc: int) -> int:

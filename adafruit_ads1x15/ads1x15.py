@@ -33,9 +33,17 @@ except ImportError:
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)
 _ADS1X15_POINTER_CONFIG = const(0x01)
+_ADS1X15_POINTER_LO_THRES = const(0x02)
+_ADS1X15_POINTER_HI_THRES = const(0x03)
+
 _ADS1X15_CONFIG_OS_SINGLE = const(0x8000)
 _ADS1X15_CONFIG_MUX_OFFSET = const(12)
-_ADS1X15_CONFIG_COMP_QUE_DISABLE = const(0x0003)
+_ADS1X15_CONFIG_COMP_QUEUE = {
+    0: 0x0003,
+    1: 0x0000,
+    2: 0x0001,
+    4: 0x0002,
+}
 _ADS1X15_CONFIG_GAIN = {
     2 / 3: 0x0000,
     1: 0x0200,
@@ -66,15 +74,28 @@ class ADS1x15:
     :param int data_rate: The data rate for ADC conversion in samples per second.
                           Default value depends on the device.
     :param Mode mode: The conversion mode, defaults to `Mode.SINGLE`.
+    :param int comparator_queue_length: The number of successive conversions exceeding
+                          the comparator threshold before asserting ALERT/RDY pin.
+                          Defaults to 0 (comparator function disabled).
+    :param int comparator_low_threshold: Voltage limit under which comparator de-asserts
+                          ALERT/RDY pin. Must be lower than high threshold to use comparator
+                          function. See subclass for value range and default.
+    :param int comparator_high_threshold: Voltage limit over which comparator asserts
+                          ALERT/RDY pin. Must be higher than low threshold to use comparator
+                          function. See subclass for value range and default.
     :param int address: The I2C address of the device.
     """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         i2c: I2C,
         gain: float = 1,
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,
+        comparator_queue_length: int = 0,
+        comparator_low_threshold: int = -32768,
+        comparator_high_threshold: int = 32767,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
         # pylint: disable=too-many-arguments
@@ -83,7 +104,10 @@ class ADS1x15:
         self.gain = gain
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.mode = mode
+        self.comparator_queue_length = comparator_queue_length
         self.i2c_device = I2CDevice(i2c, address)
+        self.comparator_low_threshold = comparator_low_threshold
+        self.comparator_high_threshold = comparator_high_threshold
 
     @property
     def bits(self) -> int:
@@ -130,6 +154,67 @@ class ADS1x15:
         g = list(_ADS1X15_CONFIG_GAIN.keys())
         g.sort()
         return g
+
+    @property
+    def comparator_queue_length(self) -> int:
+        """The ADC comparator queue length."""
+        return self._comparator_queue_length
+
+    @comparator_queue_length.setter
+    def comparator_queue_length(self, comparator_queue_length: int) -> None:
+        possible_comp_queue_lengths = self.comparator_queue_lengths
+        if comparator_queue_length not in possible_comp_queue_lengths:
+            raise ValueError(
+                "Comparator Queue must be one of: {}".format(
+                    possible_comp_queue_lengths
+                )
+            )
+        self._comparator_queue_length = comparator_queue_length
+
+    @property
+    def comparator_queue_lengths(self) -> List[int]:
+        """Possible comparator queue length settings."""
+        g = list(_ADS1X15_CONFIG_COMP_QUEUE.keys())
+        g.sort()
+        return g
+
+    @property
+    def comparator_low_threshold(self) -> int:
+        """The ADC Comparator Lower Limit Threshold."""
+        return self._comparator_low_threshold
+
+    @property
+    def comparator_high_threshold(self) -> int:
+        """The ADC Comparator Higher Limit Threshold."""
+        return self._comparator_high_threshold
+
+    @comparator_low_threshold.setter
+    def comparator_low_threshold(self, value: int) -> None:
+        """Set comparator low threshold value for ADS1x15 ADC
+
+        :param int value: 16-bit signed integer to write to register
+        """
+        if value < -32768 or value > 32767:
+            raise ValueError(
+                "Comparator Threshold value must be between -32768 and 32767"
+            )
+
+        self._comparator_low_threshold = value
+        self._write_register(_ADS1X15_POINTER_LO_THRES, self.comparator_low_threshold)
+
+    @comparator_high_threshold.setter
+    def comparator_high_threshold(self, value: int) -> None:
+        """Set comparator high threshold value for ADS1x15 ADC
+
+        :param int value: 16-bit signed integer to write to register
+        """
+        if value < -32768 or value > 32767:
+            raise ValueError(
+                "Comparator Threshold value must be between -32768 and 32767"
+            )
+
+        self._comparator_high_threshold = value
+        self._write_register(_ADS1X15_POINTER_HI_THRES, self.comparator_high_threshold)
 
     @property
     def mode(self) -> int:
@@ -183,7 +268,7 @@ class ADS1x15:
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode
         config |= self.rate_config[self.data_rate]
-        config |= _ADS1X15_CONFIG_COMP_QUE_DISABLE
+        config |= _ADS1X15_CONFIG_COMP_QUEUE[self.comparator_queue_length]
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
 
         # Wait for conversion to complete

@@ -55,12 +55,31 @@ class AnalogIn:
         Even if the underlying analog to digital converter (ADC) is
         lower resolution, the value is 16-bit.
         """
-        return self._ads.read(
-            self._pin_setting, is_differential=self.is_differential
-        ) << (16 - self._ads.bits)
+        return self._ads.read(self._pin_setting, is_differential=self.is_differential)
 
     @property
     def voltage(self) -> float:
         """Returns the voltage from the ADC pin as a floating point value."""
-        volts = self.value * _ADS1X15_PGA_RANGE[self._ads.gain] / 32767
+        volts = self.convert_to_voltage(self.value)
+        return volts
+
+    def convert_to_value(self, volts: float) -> int:
+        """Calculates a standard 16-bit integer value for a given voltage"""
+
+        lsb = _ADS1X15_PGA_RANGE[self._ads.gain] / (1 << (self._ads.bits - 1))
+        value = int(volts / lsb)
+
+        # Need to bit shift if value is only 12-bits
+        value <<= 16 - self._ads.bits
+        return value
+
+    def convert_to_voltage(self, value_int: int) -> float:
+        """Calculates voltage from 16-bit ADC reading"""
+
+        lsb = _ADS1X15_PGA_RANGE[self._ads.gain] / (1 << (self._ads.bits - 1))
+
+        # Need to bit shift if value is only 12-bits
+        value_int >>= 16 - self._ads.bits
+        volts = value_int * lsb
+
         return volts

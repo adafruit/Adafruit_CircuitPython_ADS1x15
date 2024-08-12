@@ -37,13 +37,14 @@ ads.comparator_mode = Comp_Mode.TRADITIONAL
 ads.comparator_latch = Comp_Latch.NONLATCHING
 # Set comparator output to logic LOW when asserted
 ads.comparator_polarity = Comp_Polarity.ACTIVE_LOW
-
 # Gain should be explicitly set to ensure threshold values are calculated correctly
 ads.gain = 1
 # Set comparator low threshold to 2V
 ads.comparator_low_threshold = chan.convert_to_value(2.000)
 # Set comparator high threshold to 2.002V. High threshold must be above low threshold
 ads.comparator_high_threshold = chan.convert_to_value(2.002)
+
+chan.write_config()
 
 count = 0
 while True:

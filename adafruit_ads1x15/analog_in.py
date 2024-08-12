@@ -55,7 +55,13 @@ class AnalogIn:
         Even if the underlying analog to digital converter (ADC) is
         lower resolution, the value is 16-bit.
         """
-        return self._ads.read(self._pin_setting, is_differential=self.is_differential)
+        pin = self._pin_setting if self.is_differential else self._pin_setting + 0x04
+        return self._ads.read(pin)
+
+    def write_config(self) -> None:
+        """Calculates MUX setting and writes to configuration register"""
+        pin = self._pin_setting if self.is_differential else self._pin_setting + 0x04
+        self._ads.write_config(pin)
 
     @property
     def voltage(self) -> float:

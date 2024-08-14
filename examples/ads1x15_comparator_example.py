@@ -44,8 +44,6 @@ ads.comparator_low_threshold = chan.convert_to_value(2.000)
 # Set comparator high threshold to 2.002V. High threshold must be above low threshold
 ads.comparator_high_threshold = chan.convert_to_value(2.002)
 
-chan.write_config()
-
 count = 0
 while True:
     print(chan.value, chan.voltage)  # This initiates new ADC reading

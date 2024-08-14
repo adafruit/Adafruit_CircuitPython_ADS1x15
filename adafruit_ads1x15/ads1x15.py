@@ -147,16 +147,21 @@ class ADS1x15:
         # pylint: disable=too-many-arguments
         self._last_pin_read = None
         self.buf = bytearray(3)
+        self.initialized = (
+            False  # Prevents writing to ADC until all values are initialized
+        )
+        self.i2c_device = I2CDevice(i2c, address)
         self.gain = gain
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
         self.mode = mode
         self.comparator_queue_length = comparator_queue_length
-        self.i2c_device = I2CDevice(i2c, address)
         self.comparator_low_threshold = comparator_low_threshold
         self.comparator_high_threshold = comparator_high_threshold
         self.comparator_mode = comparator_mode
         self.comparator_polarity = comparator_polarity
         self.comparator_latch = comparator_latch
+        self.initialized = True
+        self._write_config()
 
     @property
     def bits(self) -> int:
@@ -174,6 +179,8 @@ class ADS1x15:
         if rate not in possible_rates:
             raise ValueError("Data rate must be one of: {}".format(possible_rates))
         self._data_rate = rate
+        if self.initialized:
+            self._write_config()
 
     @property
     def rates(self) -> List[int]:
@@ -196,6 +203,8 @@ class ADS1x15:
         if gain not in possible_gains:
             raise ValueError("Gain must be one of: {}".format(possible_gains))
         self._gain = gain
+        if self.initialized:
+            self._write_config()
 
     @property
     def gains(self) -> List[float]:
@@ -219,6 +228,8 @@ class ADS1x15:
                 )
             )
         self._comparator_queue_length = comparator_queue_length
+        if self.initialized:
+            self._write_config()
 
     @property
     def comparator_queue_lengths(self) -> List[int]:
@@ -275,6 +286,8 @@ class ADS1x15:
         if mode not in (Mode.CONTINUOUS, Mode.SINGLE):
             raise ValueError("Unsupported mode.")
         self._mode = mode
+        if self.initialized:
+            self._write_config()
 
     @property
     def comparator_mode(self) -> int:
@@ -286,6 +299,8 @@ class ADS1x15:
         if comp_mode not in (Comp_Mode.TRADITIONAL, Comp_Mode.WINDOW):
             raise ValueError("Unsupported mode.")
         self._comparator_mode = comp_mode
+        if self.initialized:
+            self._write_config()
 
     @property
     def comparator_polarity(self) -> int:
@@ -297,6 +312,8 @@ class ADS1x15:
         if comp_pol not in (Comp_Polarity.ACTIVE_LOW, Comp_Polarity.ACTIVE_HIGH):
             raise ValueError("Unsupported mode.")
         self._comparator_polarity = comp_pol
+        if self.initialized:
+            self._write_config()
 
     @property
     def comparator_latch(self) -> int:
@@ -308,6 +325,8 @@ class ADS1x15:
         if comp_latch not in (Comp_Latch.NONLATCHING, Comp_Latch.LATCHING):
             raise ValueError("Unsupported mode.")
         self._comparator_latch = comp_latch
+        if self.initialized:
+            self._write_config()
 
     def read(self, pin: Pin) -> int:
         """I2C Interface for ADS1x15-based ADCs reads.
@@ -341,7 +360,7 @@ class ADS1x15:
 
         # Configure ADC every time before a conversion in SINGLE mode
         # or changing channels in CONTINUOUS mode
-        self.write_config(pin)
+        self._write_config(pin)
 
         # Wait for conversion to complete
         # ADS1x1x devices settle within a single conversion cycle
@@ -390,15 +409,21 @@ class ADS1x15:
                 i2c.write_then_readinto(bytearray([reg]), self.buf, in_end=2)
         return self.buf[0] << 8 | self.buf[1]
 
-    def write_config(self, pin_config: int) -> None:
+    def _write_config(self, pin_config: Optional[int] = None) -> None:
         """Write to configuration register of ADC
 
         :param int pin_config: setting for MUX value in config register
         """
+        if pin_config is None:
+            pin_config = (
+                self._read_register(_ADS1X15_POINTER_CONFIG) & 0x7000
+            ) >> _ADS1X15_CONFIG_MUX_OFFSET
+
         if self.mode == Mode.SINGLE:
             config = _ADS1X15_CONFIG_OS_SINGLE
         else:
             config = 0
+
         config |= (pin_config & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode
@@ -408,3 +433,35 @@ class ADS1x15:
         config |= self.comparator_latch
         config |= _ADS1X15_CONFIG_COMP_QUEUE[self.comparator_queue_length]
         self._write_register(_ADS1X15_POINTER_CONFIG, config)
+
+    def _read_config(self) -> None:
+        """Reads Config Register and sets all properties accordingly"""
+        config_value = self._read_register(_ADS1X15_POINTER_CONFIG)
+
+        self.gain = next(
+            key
+            for key, value in _ADS1X15_CONFIG_GAIN.items()
+            if value == (config_value & 0x0E00)
+        )
+        self.data_rate = next(
+            key
+            for key, value in self.rate_config.items()
+            if value == (config_value & 0x00E0)
+        )
+        self.comparator_queue_length = next(
+            key
+            for key, value in _ADS1X15_CONFIG_COMP_QUEUE.items()
+            if value == (config_value & 0x0003)
+        )
+        self.mode = Mode.SINGLE if config_value & 0x0100 else Mode.CONTINUOUS
+        self.comparator_mode = (
+            Comp_Mode.WINDOW if config_value & 0x0010 else Comp_Mode.TRADITIONAL
+        )
+        self.comparator_polarity = (
+            Comp_Polarity.ACTIVE_HIGH
+            if config_value & 0x0008
+            else Comp_Polarity.ACTIVE_LOW
+        )
+        self.comparator_latch = (
+            Comp_Latch.LATCHING if config_value & 0x0004 else Comp_Latch.NONLATCHING
+        )

@@ -58,11 +58,6 @@ class AnalogIn:
         pin = self._pin_setting if self.is_differential else self._pin_setting + 0x04
         return self._ads.read(pin)
 
-    def write_config(self) -> None:
-        """Calculates MUX setting and writes to configuration register"""
-        pin = self._pin_setting if self.is_differential else self._pin_setting + 0x04
-        self._ads.write_config(pin)
-
     @property
     def voltage(self) -> float:
         """Returns the voltage from the ADC pin as a floating point value."""

@@ -9,6 +9,7 @@ import countio
 import adafruit_ads1x15.ads1015 as ADS
 
 # import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.ads1x15 import Mode, Comp_Mode, Comp_Polarity, Comp_Latch
 from adafruit_ads1x15.analog_in import AnalogIn
 
 # Create the I2C bus
@@ -26,9 +27,18 @@ chan = AnalogIn(ads, ADS.P0)
 # Create Interrupt-driven input to track comparator changes
 int_pin = countio.Counter(board.GP9, edge=countio.Edge.RISE)
 
+# Set ADC to continuously read new data
+ads.mode = Mode.CONTINUOUS
 # Set comparator to assert after 1 ADC conversion
 ads.comparator_queue_length = 1
-
+# Set comparator to use traditional threshold instead of window
+ads.comparator_mode = Comp_Mode.TRADITIONAL
+# Set comparator output to de-assert if readings no longer above threshold
+ads.comparator_latch = Comp_Latch.NONLATCHING
+# Set comparator output to logic LOW when asserted
+ads.comparator_polarity = Comp_Polarity.ACTIVE_LOW
+# Gain should be explicitly set to ensure threshold values are calculated correctly
+ads.gain = 1
 # Set comparator low threshold to 2V
 ads.comparator_low_threshold = chan.convert_to_value(2.000)
 # Set comparator high threshold to 2.002V. High threshold must be above low threshold

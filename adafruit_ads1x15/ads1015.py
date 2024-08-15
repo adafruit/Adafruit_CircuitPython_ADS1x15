@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 # pylint: disable=unused-import
-from .ads1x15 import ADS1x15, Mode
+from .ads1x15 import ADS1x15
 
 # Data sample rates
 _ADS1015_CONFIG_DR = {

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import busio
 import countio
@@ -9,7 +10,7 @@ import countio
 import adafruit_ads1x15.ads1015 as ADS
 
 # import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.ads1x15 import Mode, Comp_Mode, Comp_Polarity, Comp_Latch
+from adafruit_ads1x15.ads1x15 import Comp_Latch, Comp_Mode, Comp_Polarity, Mode
 from adafruit_ads1x15.analog_in import AnalogIn
 
 # Create the I2C bus

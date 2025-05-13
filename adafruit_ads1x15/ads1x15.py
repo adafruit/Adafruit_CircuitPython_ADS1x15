@@ -59,7 +59,6 @@ class Mode:
 
     # See datasheet "Operating Modes" section
     # values here are masks for setting MODE bit in Config Register
-    # pylint: disable=too-few-public-methods
     CONTINUOUS = 0x0000
     """Continuous Mode"""
     SINGLE = 0x0100
@@ -71,7 +70,6 @@ class Comp_Mode:
 
     # See datasheet "Operating Modes" section
     # values here are masks for setting COMP_MODE bit in Config Register
-    # pylint: disable=too-few-public-methods
     TRADITIONAL = 0x0000
     """Traditional Compartor Mode activates above high threshold, de-activates below low"""
     WINDOW = 0x0010
@@ -83,7 +81,6 @@ class Comp_Polarity:
 
     # See datasheet "Operating Modes" section
     # values here are masks for setting COMP_POL bit in Config Register
-    # pylint: disable=too-few-public-methods
     ACTIVE_LOW = 0x0000
     """ALERT_RDY pin is LOW when comparator is active"""
     ACTIVE_HIGH = 0x0008
@@ -95,7 +92,6 @@ class Comp_Latch:
 
     # See datasheet "Operating Modes" section
     # values here are masks for setting COMP_LAT bit in Config Register
-    # pylint: disable=too-few-public-methods
     NONLATCHING = 0x0000
     """ALERT_RDY pin does not latch when asserted"""
     LATCHING = 0x0004
@@ -129,7 +125,6 @@ class ADS1x15:
     :param int address: The I2C address of the device.
     """
 
-    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         i2c: I2C,
@@ -144,12 +139,9 @@ class ADS1x15:
         comparator_latch: int = Comp_Latch.NONLATCHING,
         address: int = _ADS1X15_DEFAULT_ADDRESS,
     ):
-        # pylint: disable=too-many-arguments
         self._last_pin_read = None
         self.buf = bytearray(3)
-        self.initialized = (
-            False  # Prevents writing to ADC until all values are initialized
-        )
+        self.initialized = False  # Prevents writing to ADC until all values are initialized
         self.i2c_device = I2CDevice(i2c, address)
         self.gain = gain
         self.data_rate = self._data_rate_default() if data_rate is None else data_rate
@@ -177,7 +169,7 @@ class ADS1x15:
     def data_rate(self, rate: int) -> None:
         possible_rates = self.rates
         if rate not in possible_rates:
-            raise ValueError("Data rate must be one of: {}".format(possible_rates))
+            raise ValueError(f"Data rate must be one of: {possible_rates}")
         self._data_rate = rate
         if self.initialized:
             self._write_config()
@@ -201,7 +193,7 @@ class ADS1x15:
     def gain(self, gain: float) -> None:
         possible_gains = self.gains
         if gain not in possible_gains:
-            raise ValueError("Gain must be one of: {}".format(possible_gains))
+            raise ValueError(f"Gain must be one of: {possible_gains}")
         self._gain = gain
         if self.initialized:
             self._write_config()
@@ -222,11 +214,7 @@ class ADS1x15:
     def comparator_queue_length(self, comparator_queue_length: int) -> None:
         possible_comp_queue_lengths = self.comparator_queue_lengths
         if comparator_queue_length not in possible_comp_queue_lengths:
-            raise ValueError(
-                "Comparator Queue must be one of: {}".format(
-                    possible_comp_queue_lengths
-                )
-            )
+            raise ValueError(f"Comparator Queue must be one of: {possible_comp_queue_lengths}")
         self._comparator_queue_length = comparator_queue_length
         if self.initialized:
             self._write_config()
@@ -255,9 +243,7 @@ class ADS1x15:
         :param int value: 16-bit signed integer to write to register
         """
         if value < -32768 or value > 32767:
-            raise ValueError(
-                "Comparator Threshold value must be between -32768 and 32767"
-            )
+            raise ValueError("Comparator Threshold value must be between -32768 and 32767")
 
         self._comparator_low_threshold = value
         self._write_register(_ADS1X15_POINTER_LO_THRES, self.comparator_low_threshold)
@@ -269,9 +255,7 @@ class ADS1x15:
         :param int value: 16-bit signed integer to write to register
         """
         if value < -32768 or value > 32767:
-            raise ValueError(
-                "Comparator Threshold value must be between -32768 and 32767"
-            )
+            raise ValueError("Comparator Threshold value must be between -32768 and 32767")
 
         self._comparator_high_threshold = value
         self._write_register(_ADS1X15_POINTER_HI_THRES, self.comparator_high_threshold)
@@ -283,7 +267,7 @@ class ADS1x15:
 
     @mode.setter
     def mode(self, mode: int) -> None:
-        if mode not in (Mode.CONTINUOUS, Mode.SINGLE):
+        if mode not in {Mode.CONTINUOUS, Mode.SINGLE}:
             raise ValueError("Unsupported mode.")
         self._mode = mode
         if self.initialized:
@@ -296,7 +280,7 @@ class ADS1x15:
 
     @comparator_mode.setter
     def comparator_mode(self, comp_mode: int) -> None:
-        if comp_mode not in (Comp_Mode.TRADITIONAL, Comp_Mode.WINDOW):
+        if comp_mode not in {Comp_Mode.TRADITIONAL, Comp_Mode.WINDOW}:
             raise ValueError("Unsupported mode.")
         self._comparator_mode = comp_mode
         if self.initialized:
@@ -309,7 +293,7 @@ class ADS1x15:
 
     @comparator_polarity.setter
     def comparator_polarity(self, comp_pol: int) -> None:
-        if comp_pol not in (Comp_Polarity.ACTIVE_LOW, Comp_Polarity.ACTIVE_HIGH):
+        if comp_pol not in {Comp_Polarity.ACTIVE_LOW, Comp_Polarity.ACTIVE_HIGH}:
             raise ValueError("Unsupported mode.")
         self._comparator_polarity = comp_pol
         if self.initialized:
@@ -322,7 +306,7 @@ class ADS1x15:
 
     @comparator_latch.setter
     def comparator_latch(self, comp_latch: int) -> None:
-        if comp_latch not in (Comp_Latch.NONLATCHING, Comp_Latch.LATCHING):
+        if comp_latch not in {Comp_Latch.NONLATCHING, Comp_Latch.LATCHING}:
             raise ValueError("Unsupported mode.")
         self._comparator_latch = comp_latch
         if self.initialized:
@@ -439,14 +423,10 @@ class ADS1x15:
         config_value = self._read_register(_ADS1X15_POINTER_CONFIG)
 
         self.gain = next(
-            key
-            for key, value in _ADS1X15_CONFIG_GAIN.items()
-            if value == (config_value & 0x0E00)
+            key for key, value in _ADS1X15_CONFIG_GAIN.items() if value == (config_value & 0x0E00)
         )
         self.data_rate = next(
-            key
-            for key, value in self.rate_config.items()
-            if value == (config_value & 0x00E0)
+            key for key, value in self.rate_config.items() if value == (config_value & 0x00E0)
         )
         self.comparator_queue_length = next(
             key
@@ -454,13 +434,9 @@ class ADS1x15:
             if value == (config_value & 0x0003)
         )
         self.mode = Mode.SINGLE if config_value & 0x0100 else Mode.CONTINUOUS
-        self.comparator_mode = (
-            Comp_Mode.WINDOW if config_value & 0x0010 else Comp_Mode.TRADITIONAL
-        )
+        self.comparator_mode = Comp_Mode.WINDOW if config_value & 0x0010 else Comp_Mode.TRADITIONAL
         self.comparator_polarity = (
-            Comp_Polarity.ACTIVE_HIGH
-            if config_value & 0x0008
-            else Comp_Polarity.ACTIVE_LOW
+            Comp_Polarity.ACTIVE_HIGH if config_value & 0x0008 else Comp_Polarity.ACTIVE_LOW
         )
         self.comparator_latch = (
             Comp_Latch.LATCHING if config_value & 0x0004 else Comp_Latch.NONLATCHING

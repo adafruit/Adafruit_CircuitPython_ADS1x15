@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import busio
+
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
@@ -22,5 +24,5 @@ chan = AnalogIn(ads, ADS.P0)
 print("{:>5}\t{:>5}".format("raw", "v"))
 
 while True:
-    print("{:>5}\t{:>5.3f}".format(chan.value, chan.voltage))
+    print(f"{chan.value:>5}\t{chan.voltage:>5.3f}")
     time.sleep(0.5)

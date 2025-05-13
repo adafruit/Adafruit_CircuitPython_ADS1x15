@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import busio
 
@@ -36,9 +37,9 @@ gains = (2 / 3, 1, 2, 4, 8, 16)
 
 while True:
     ads.gain = gains[0]
-    print("{:5} {:5.3f}".format(chan.value, chan.voltage), end="")
+    print(f"{chan.value:5} {chan.voltage:5.3f}", end="")
     for gain in gains[1:]:
         ads.gain = gain
-        print(" | {:5} {:5.3f}".format(chan.value, chan.voltage), end="")
+        print(f" | {chan.value:5} {chan.voltage:5.3f}", end="")
     print()
     time.sleep(0.5)

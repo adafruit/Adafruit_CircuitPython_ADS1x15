@@ -10,6 +10,7 @@ CircuitPython driver for 1115 ADCs.
 
 * Author(s): Carter Nelson
 """
+
 import struct
 
 try:
@@ -19,7 +20,6 @@ try:
 except ImportError:
     pass
 
-# pylint: disable=unused-import
 from .ads1x15 import ADS1x15
 
 # Data sample rates
@@ -65,10 +65,10 @@ class ADS1115(ADS1x15):
         """Rate configuration masks."""
         return _ADS1115_CONFIG_DR
 
-    def _data_rate_default(self) -> Literal[128]:
+    def _data_rate_default(self) -> Literal[128]:  # noqa: PLR6301
         """Default data rate setting is 128 samples per second"""
         return 128
 
-    def _conversion_value(self, raw_adc: int) -> int:
+    def _conversion_value(self, raw_adc: int) -> int:  # noqa: PLR6301
         value = struct.unpack(">h", raw_adc.to_bytes(2, "big"))[0]
         return value

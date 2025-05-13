@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import busio
+
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.ads1x15 import Mode
 from adafruit_ads1x15.analog_in import AnalogIn
@@ -70,15 +72,15 @@ rate_actual = (SAMPLES - repeats) / total_time
 # NOTE: leave input floating to pickup some random noise
 #       This cannot estimate conversion rates higher than polling rate
 
-print("Took {:5.3f} s to acquire {:d} samples.".format(total_time, SAMPLES))
+print(f"Took {total_time:5.3f} s to acquire {SAMPLES:d} samples.")
 print("")
 print("Configured:")
-print("    Requested       = {:5d}    sps".format(RATE))
-print("    Reported        = {:5d}    sps".format(ads.data_rate))
+print(f"    Requested       = {RATE:5d}    sps")
+print(f"    Reported        = {ads.data_rate:5d}    sps")
 print("")
 print("Actual:")
-print("    Polling Rate    = {:8.2f} sps".format(rate_reported))
-print("                      {:9.2%}".format(rate_reported / RATE))
-print("    Skipped         = {:5d}".format(skips))
-print("    Repeats         = {:5d}".format(repeats))
-print("    Conversion Rate = {:8.2f} sps   (estimated)".format(rate_actual))
+print(f"    Polling Rate    = {rate_reported:8.2f} sps")
+print(f"                      {rate_reported / RATE:9.2%}")
+print(f"    Skipped         = {skips:5d}")
+print(f"    Repeats         = {repeats:5d}")
+print(f"    Conversion Rate = {rate_actual:8.2f} sps   (estimated)")

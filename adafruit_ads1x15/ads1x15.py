@@ -53,6 +53,16 @@ _ADS1X15_CONFIG_GAIN = {
     16: 0x0A00,
 }
 
+# Pins
+PIN0 = 0
+"""Analog Pin 0"""
+PIN1 = 1
+"""Analog Pin 1"""
+PIN2 = 2
+"""Analog Pin 2"""
+PIN3 = 3
+"""Analog Pin 3"""
+
 
 class Mode:
     """An enum-like class representing possible ADC operating modes."""

@@ -23,12 +23,8 @@ try:
     from typing import Dict, List, Optional
 
     from busio import I2C
-    from microcontroller import Pin
 except ImportError:
-    # define Pin to avoid the error:
-    #   def read(self, pin: Pin, is_differential: bool = False) -> int:
-    #   NameError: name 'Pin' is not defined
-    Pin = None
+    pass
 
 _ADS1X15_DEFAULT_ADDRESS = const(0x48)
 _ADS1X15_POINTER_CONVERSION = const(0x00)
@@ -52,6 +48,19 @@ _ADS1X15_CONFIG_GAIN = {
     8: 0x0800,
     16: 0x0A00,
 }
+
+
+class Pin:
+    """An enum-like class representing possible ADC pins."""
+
+    A0 = 0
+    """Analog Pin 0"""
+    A1 = 1
+    """Analog Pin 1"""
+    A2 = 2
+    """Analog Pin 2"""
+    A3 = 3
+    """Analog Pin 3"""
 
 
 class Mode:
@@ -312,10 +321,10 @@ class ADS1x15:
         if self.initialized:
             self._write_config()
 
-    def read(self, pin: Pin) -> int:
+    def read(self, pin: int) -> int:
         """I2C Interface for ADS1x15-based ADCs reads.
 
-        :param ~microcontroller.Pin pin: individual or differential pin.
+        :param int pin: individual or differential pin.
         :param bool is_differential: single-ended or differential read.
         """
         return self._read(pin)
@@ -332,7 +341,7 @@ class ADS1x15:
         """
         raise NotImplementedError("Subclass must implement _conversion_value function!")
 
-    def _read(self, pin: Pin) -> int:
+    def _read(self, pin: int) -> int:
         """Perform an ADC read. Returns the signed integer result of the read."""
         # Immediately return conversion register result if in CONTINUOUS mode
         # and pin has not changed

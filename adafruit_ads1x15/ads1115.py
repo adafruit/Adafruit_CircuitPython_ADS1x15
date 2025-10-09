@@ -34,16 +34,6 @@ _ADS1115_CONFIG_DR = {
     860: 0x00E0,
 }
 
-# Pins
-P0 = 0
-"""Analog Pin 0"""
-P1 = 1
-"""Analog Pin 1"""
-P2 = 2
-"""Analog Pin 2"""
-P3 = 3
-"""Analog Pin 3"""
-
 
 class ADS1115(ADS1x15):
     """Class for the ADS1115 16 bit ADC."""

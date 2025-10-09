@@ -6,9 +6,7 @@ import time
 import board
 import busio
 
-import adafruit_ads1x15.ads1015 as ADS
-from adafruit_ads1x15.ads1x15 import Mode
-from adafruit_ads1x15.analog_in import AnalogIn
+from adafruit_ads1x15 import ADS1015, AnalogIn, ads1x15
 
 # Data collection setup
 RATE = 3300
@@ -21,18 +19,18 @@ SAMPLES = 1000
 i2c = busio.I2C(board.SCL, board.SDA, frequency=1000000)
 
 # Create the ADC object using the I2C bus
-ads = ADS.ADS1015(i2c)
+ads = ADS1015(i2c)
 
 # Create single-ended input on channel 0
-chan0 = AnalogIn(ads, ADS.P0)
+chan = AnalogIn(ads, ads1x15.Pin.A0)
 
 # ADC Configuration
-ads.mode = Mode.CONTINUOUS
+ads.mode = ads1x15.Mode.CONTINUOUS
 ads.data_rate = RATE
 
 # First ADC channel read in continuous mode configures device
 # and waits 2 conversion cycles
-_ = chan0.value
+_ = chan.value
 
 sample_interval = 1.0 / ads.data_rate
 
@@ -51,7 +49,7 @@ for i in range(SAMPLES):
         pass
 
     # Read conversion value for ADC channel
-    data[i] = chan0.value
+    data[i] = chan.value
 
     # Loop timing
     time_last_sample = time.monotonic()

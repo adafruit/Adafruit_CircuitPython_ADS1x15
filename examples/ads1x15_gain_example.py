@@ -4,23 +4,20 @@
 import time
 
 import board
-import busio
 
-# import adafruit_ads1x15.ads1015 as ADS
-import adafruit_ads1x15.ads1115 as ADS
-from adafruit_ads1x15.analog_in import AnalogIn
+from adafruit_ads1x15 import ADS1115, AnalogIn, ads1x15
 
 # Create the I2C bus
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
 
 # Create the ADS object
 # ads = ADS.ADS1015(i2c)
-ads = ADS.ADS1115(i2c)
+ads = ADS1115(i2c)
 
-# Create a single-ended channel on Pin 0
+# Create a single-ended channel on Pin A0
 #   Max counts for ADS1015 = 2047
 #                  ADS1115 = 32767
-chan = AnalogIn(ads, ADS.P0)
+chan = AnalogIn(ads, ads1x15.Pin.A0)
 
 # The ADS1015 and ADS1115 both have the same gain options.
 #

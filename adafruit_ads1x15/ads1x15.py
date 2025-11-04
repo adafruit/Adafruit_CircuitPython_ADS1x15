@@ -136,7 +136,7 @@ class ADS1x15:
 
     def __init__(
         self,
-        i2c: I2C,
+        i2c: "I2C",
         gain: float = 1,
         data_rate: Optional[int] = None,
         mode: int = Mode.SINGLE,

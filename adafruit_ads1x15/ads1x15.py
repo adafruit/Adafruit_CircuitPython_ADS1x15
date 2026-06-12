@@ -403,20 +403,23 @@ class ADS1x15:
         return self.buf[0] << 8 | self.buf[1]
 
     def _write_config(self, pin_config: Optional[int] = None) -> None:
-        """Write to configuration register of ADC
+        """Write to configuration register of ADC. If the optional
+        `pin_config` parameter is used then an ADC conversion is also initiated.
 
         :param int pin_config: setting for MUX value in config register
         """
-        if pin_config is None:
+        config = 0
+
+        if pin_config is not None and self.mode == Mode.SINGLE:
+            # set OS bit as needed to initiate a conversion
+            config = _ADS1X15_CONFIG_OS_SINGLE
+        else:
+            # read current mux setting from config register
             pin_config = (
                 self._read_register(_ADS1X15_POINTER_CONFIG) & 0x7000
             ) >> _ADS1X15_CONFIG_MUX_OFFSET
 
-        if self.mode == Mode.SINGLE:
-            config = _ADS1X15_CONFIG_OS_SINGLE
-        else:
-            config = 0
-
+        # OR everything together and write result to config register
         config |= (pin_config & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
         config |= _ADS1X15_CONFIG_GAIN[self.gain]
         config |= self.mode

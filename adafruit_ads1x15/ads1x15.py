@@ -348,9 +348,6 @@ class ADS1x15:
         if self.mode == Mode.CONTINUOUS and self._last_pin_read == pin:
             return self._conversion_value(self.get_last_result(True))
 
-        # Assign last pin read if in SINGLE mode or first sample in CONTINUOUS mode on this pin
-        self._last_pin_read = pin
-
         # Configure ADC every time before a conversion in SINGLE mode
         # or changing channels in CONTINUOUS mode
         self._write_config(pin)
@@ -366,7 +363,9 @@ class ADS1x15:
             # Wait expected time for two conversions to complete
             time.sleep(2 / self.data_rate)
 
-        return self._conversion_value(self.get_last_result(False))
+        result = self.get_last_result(False)
+        self._last_pin_read = pin
+        return self._conversion_value(result)
 
     def _conversion_complete(self) -> int:
         """Return status of ADC conversion."""
@@ -385,6 +384,8 @@ class ADS1x15:
 
     def _write_register(self, reg: int, value: int):
         """Write 16 bit value to register."""
+        # Register writes leave the device pointer away from the conversion register.
+        self._last_pin_read = None
         self.buf[0] = reg
         self.buf[1] = (value >> 8) & 0xFF
         self.buf[2] = value & 0xFF
@@ -395,6 +396,8 @@ class ADS1x15:
         """Read 16 bit register value. If fast is True, the pointer register
         is not updated.
         """
+        if not fast and reg != _ADS1X15_POINTER_CONVERSION:
+            self._last_pin_read = None
         with self.i2c_device as i2c:
             if fast:
                 i2c.readinto(self.buf, end=2)
@@ -404,20 +407,20 @@ class ADS1x15:
 
     def _write_config(self, pin_config: Optional[int] = None) -> None:
         """Write to configuration register of ADC. If the optional
-        `pin_config` parameter is used then an ADC conversion is also initiated.
+        `pin_config` parameter is used in single-shot mode, it also initiates a conversion.
 
         :param int pin_config: setting for MUX value in config register
         """
         config = 0
 
-        if pin_config is not None and self.mode == Mode.SINGLE:
-            # set OS bit as needed to initiate a conversion
-            config = _ADS1X15_CONFIG_OS_SINGLE
-        else:
+        if pin_config is None:
             # read current mux setting from config register
             pin_config = (
                 self._read_register(_ADS1X15_POINTER_CONFIG) & 0x7000
             ) >> _ADS1X15_CONFIG_MUX_OFFSET
+        elif self.mode == Mode.SINGLE:
+            # set OS bit as needed to initiate a conversion
+            config = _ADS1X15_CONFIG_OS_SINGLE
 
         # OR everything together and write result to config register
         config |= (pin_config & 0x07) << _ADS1X15_CONFIG_MUX_OFFSET
